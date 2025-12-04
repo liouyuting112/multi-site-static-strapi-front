@@ -4,6 +4,11 @@
 // 例如: node import-fixed-article.js site1 retro-vs-modern
 // =========================================================
 
+// 修復 SSL/TLS 問題（必須在最前面）
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+import './ssl-fix.js';
+
 import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
@@ -247,5 +252,6 @@ if (!/^site[1-5]$/.test(site)) {
 }
 
 await importFixedArticle(site, slug);
+
 
 

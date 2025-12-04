@@ -33,3 +33,4 @@ if (lines.length > 4 && lines[4].includes('article-cms.js')) {
 fs.writeFileSync(articleCmsPath, articleContent, 'utf8');
 console.log('✅ 已修復 article-cms.js 第 5 行的語法錯誤');
 
+

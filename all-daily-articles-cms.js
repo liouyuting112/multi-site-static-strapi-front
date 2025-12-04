@@ -1,6 +1,6 @@
 // =========================================================
 // 通用所有每日文章頁面 CMS
-// 支援所有網站，自動適配 HTML 結構
+// 自動適配各網站原始樣式，保留圖片和佈局
 // =========================================================
 // 配置：請根據你的 Strapi 設定修改
 const STRAPI_URL = 'https://effortless-whisper-83765d99df.strapiapp.com'; // Strapi Cloud URL
@@ -24,20 +24,46 @@ function getPostAttributes(post) {
     return rest;
 }
 
-function extractFirstParagraph(html) {
-    if (!html) return '';
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    const p = div.querySelector('p');
-    return p ? p.textContent.trim() : '';
+function extractFirstParagraph(htmlContent, maxLength = 100) {
+    if (!htmlContent) return '';
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    const firstP = tempDiv.querySelector('p');
+    if (!firstP) {
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        const cleanText = text.trim().replace(/\s+/g, ' ');
+        if (cleanText.length > maxLength) {
+            return cleanText.substring(0, maxLength) + '...';
+        }
+        return cleanText;
+    }
+    
+    let text = firstP.textContent || firstP.innerText || '';
+    text = text.trim().replace(/\s+/g, ' ');
+    
+    if (text.length > maxLength) {
+        text = text.substring(0, maxLength) + '...';
+    }
+    
+    return text;
 }
 
-function getArticleDescription(post) {
+function getArticleDescription(post, maxLength = 100) {
     const attrs = getPostAttributes(post);
-    if (attrs.description) return attrs.description;
-    if (attrs.html) {
-        return extractFirstParagraph(attrs.html);
+    
+    if (attrs.excerpt && attrs.excerpt.trim() && attrs.excerpt !== attrs.title) {
+        return attrs.excerpt.length > maxLength ? attrs.excerpt.substring(0, maxLength) + '...' : attrs.excerpt;
     }
+    
+    if (attrs.html) {
+        const extracted = extractFirstParagraph(attrs.html, maxLength);
+        if (extracted && extracted !== attrs.title) {
+            return extracted;
+        }
+    }
+    
     return '';
 }
 
@@ -84,6 +110,235 @@ async function fetchAllDailyPosts(site) {
 }
 
 // =========================================================
+// 自動檢測網站結構類型（根據網站名稱和 CSS 類別）
+// =========================================================
+function detectSiteStructure(site, container) {
+    const containerClass = container.className || '';
+    
+    // 根據網站名稱判斷結構類型
+    if (site === 'site1') {
+        // site1: widget 風格，圖片在左，文字在右，垂直列表
+        return { type: 'widget', hasImage: true, layout: 'vertical', containerTag: 'ul' };
+    }
+    
+    if (site === 'site2') {
+        // site2: 網格卡片，圖片在上，文字在下，兩欄或三欄網格
+        return { type: 'card-grid', hasImage: true, layout: 'grid', containerTag: 'ul' };
+    }
+    
+    if (site === 'site3') {
+        // site3: 網格卡片，圖片在上，文字在下
+        return { type: 'grid-card', hasImage: true, layout: 'grid', containerTag: 'div' };
+    }
+    
+    if (site === 'site4') {
+        // site4: 純文字列表（但我們加上圖片），垂直列表
+        return { type: 'text-list', hasImage: true, layout: 'vertical', containerTag: 'ul' };
+    }
+    
+    if (site === 'site5') {
+        // site5: feed 風格，圖片在左，文字在右
+        return { type: 'feed', hasImage: true, layout: 'horizontal', containerTag: 'div' };
+    }
+    
+    if (site === 'site9') {
+        // site9: 卡片網格，圖片在上，文字在下（與首頁格式一致）
+        return { type: 'card-grid', hasImage: true, layout: 'grid', containerTag: 'div' };
+    }
+    
+    if (site === 'site10') {
+        // site10: 雜誌列表
+        return { type: 'magazine-list', hasImage: true, layout: 'vertical', containerTag: 'ul' };
+    }
+    
+    if (site === 'site6' || site === 'site7' || site === 'site8') {
+        // site6-8: 簡單列表，圖片在左，文字在右
+        return { type: 'simple-list', hasImage: true, layout: 'horizontal', containerTag: 'ul' };
+    }
+    
+    // 預設：根據容器類別判斷
+    if (containerClass.includes('widget') || containerClass.includes('all-daily-articles-list')) {
+        return { type: 'widget', hasImage: true, layout: 'vertical', containerTag: 'ul' };
+    }
+    
+    if (containerClass.includes('grid') || containerClass.includes('daily-grid')) {
+        return { type: 'grid-card', hasImage: true, layout: 'grid', containerTag: 'div' };
+    }
+    
+    // 預設：簡單列表，圖片在左，文字在右
+    return { type: 'simple-list', hasImage: true, layout: 'horizontal', containerTag: 'ul' };
+}
+
+// =========================================================
+// 根據結構類型生成 HTML
+// =========================================================
+function generateArticleHTML(post, structure, site, index) {
+    const attrs = getPostAttributes(post);
+    const title = attrs.title || attrs.slug || '無標題';
+    const slug = attrs.slug;
+    const description = getArticleDescription(post, 150);
+    
+    // 日期處理
+    let date = '';
+    const dateSource = attrs.date || attrs.publishedAt || attrs.createdAt;
+    if (dateSource) {
+        const d = new Date(dateSource);
+        if (!isNaN(d.getTime())) {
+            date = d.toISOString().split('T')[0];
+        }
+    }
+    
+    // 圖片 URL（優先使用 Strapi 的 imageUrl）
+    let imgUrl = attrs.imageUrl || '';
+    if (!imgUrl) {
+        // 根據索引循環使用圖片
+        const imgIndex = (index % 3) + 1;
+        imgUrl = `https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/${site}-daily${imgIndex}.webp?raw=true`;
+    }
+    
+    // 根據結構類型生成 HTML
+    switch (structure.type) {
+        case 'widget':
+            // site1 風格：垂直列表，圖片在上，文字在下
+            return `
+                <li>
+                    <a href="articles/${slug}.html">
+                        <div class="widget-img">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        </div>
+                        <div class="widget-text">
+                            <h4>${title}</h4>
+                            <p>${description}</p>
+                            ${date ? `<span class="date">${date}</span>` : ''}
+                        </div>
+                    </a>
+                </li>
+            `;
+        
+        case 'card-grid':
+            // site2, site9 風格：網格卡片，圖片在上，文字在下
+            if (site === 'site9') {
+                // site9 風格：卡片網格（與首頁格式一致）
+                return `
+                    <article class="daily-card">
+                        <a href="articles/${slug}.html" class="daily-card-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        </a>
+                        <div class="daily-card-content">
+                            ${date ? `<div class="daily-date">${date}</div>` : ''}
+                            <h3><a href="articles/${slug}.html" style="color: #ffffff;">${title}</a></h3>
+                            ${description ? `<p>${description}</p>` : ''}
+                        </div>
+                    </article>
+                `;
+            } else {
+                // site2 風格：網格卡片
+                return `
+                    <li>
+                        <a href="articles/${slug}.html">
+                            <img src="${imgUrl}" class="daily-card-img" alt="${title}" loading="lazy">
+                            <div class="daily-card-content">
+                                <h3>${title}</h3>
+                                <p>${description}</p>
+                                ${date ? `<span class="publish-date">${date}</span>` : ''}
+                            </div>
+                        </a>
+                    </li>
+                `;
+            }
+        
+        case 'grid-card':
+            // site3 風格：網格卡片
+            return `
+                <a href="articles/${slug}.html" class="daily-item">
+                    <div class="item-image">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </div>
+                    <div class="item-info">
+                        <h3>${title}</h3>
+                        <p>${description}</p>
+                        ${date ? `<span class="meta-date">${date}</span>` : ''}
+                    </div>
+                </a>
+            `;
+        
+        case 'feed':
+            // site5 風格：feed 風格，圖片在左，文字在右
+            return `
+                <a href="articles/${slug}.html" class="feed-item">
+                    <div class="feed-icon">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </div>
+                    <div class="feed-content">
+                        <h3>${title}</h3>
+                        <p>${description}</p>
+                        ${date ? `<span class="time-ago">${date}</span>` : ''}
+                    </div>
+                </a>
+            `;
+        
+        case 'text-list':
+            // site4 風格：列表，圖片在左，文字在右
+            return `
+                <li>
+                    <a href="articles/${slug}.html" class="daily-link" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid #e5e7eb;">
+                        <div style="flex-shrink: 0; width: 200px; height: 150px; overflow: hidden; border-radius: 8px; background: #f3f4f6;">
+                            <img src="${imgUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+                        </div>
+                        <div class="daily-content" style="flex: 1;">
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">${title}</h3>
+                            <p style="margin: 0 0 0.5rem 0; color: #666; line-height: 1.6;">${description}</p>
+                            ${date ? `<span class="publish-date" style="font-size: 0.9rem; color: #999;">${date}</span>` : ''}
+                        </div>
+                    </a>
+                </li>
+            `;
+        
+        case 'magazine-list':
+            // site10 風格：雜誌列表
+            return `
+                <li class="daily-magazine-item">
+                    <div class="daily-item-header">
+                        <a href="articles/${slug}.html" class="daily-item-title">${title}</a>
+                        ${date ? `<span class="daily-item-date">${date}</span>` : ''}
+                    </div>
+                    ${description ? `<p class="daily-item-text">${description}</p>` : ''}
+                </li>
+            `;
+        
+        case 'card':
+            // 通用卡片風格
+            return `
+                <article class="article-card">
+                    <a href="articles/${slug}.html">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        <h3>${title}</h3>
+                        <p>${description}</p>
+                        ${date ? `<span class="publish-date">${date}</span>` : ''}
+                    </a>
+                </article>
+            `;
+        
+        default:
+            // site6-8 風格：簡單列表，圖片在左，文字在右
+            return `
+                <li class="all-daily-item">
+                    <div class="daily-article-link" style="display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-top: 1px solid rgba(148, 163, 184, 0.35);">
+                        <div style="flex-shrink: 0; width: 200px; height: 150px; overflow: hidden; border-radius: 8px; background: #f3f4f6;">
+                            <img src="${imgUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+                        </div>
+                        <div style="flex: 1;">
+                            <a href="articles/${slug}.html" style="color: #f9fafb; text-decoration: none; font-size: 17px; font-weight: 500; display: block; margin-bottom: 8px;">${title}</a>
+                            ${date ? `<span class="publish-date" style="font-size: 12px; color: #9ca3af; display: block; margin-bottom: 8px;">${date}</span>` : ''}
+                            ${description ? `<p class="daily-snippet" style="margin: 0; font-size: 13px; color: #d1d5db; line-height: 1.6;">${description}</p>` : ''}
+                        </div>
+                    </div>
+                </li>
+            `;
+    }
+}
+
+// =========================================================
 // 載入所有每日文章
 // =========================================================
 async function loadAllDailyArticles() {
@@ -95,9 +350,11 @@ async function loadAllDailyArticles() {
         '.all-daily-list',
         '.all-daily-articles-list',
         '.daily-list',
+        '.daily-article-list',
         '.article-list',
         'ul[class*="daily"]',
-        'ul[class*="article"]'
+        'ul[class*="article"]',
+        'div[class*="daily"]'
     ];
     
     let container = null;
@@ -113,6 +370,10 @@ async function loadAllDailyArticles() {
         console.warn(`⚠️ [${site}] 找不到文章列表容器`);
         return;
     }
+    
+    // 檢測網站結構
+    const structure = detectSiteStructure(site, container);
+    console.log(`📋 [${site}] 檢測到結構類型:`, structure);
     
     const posts = await fetchAllDailyPosts(site);
     
@@ -134,7 +395,7 @@ async function loadAllDailyArticles() {
         }
     }
     
-    // 按日期排序
+    // 按日期排序（最新的在前）
     uniquePosts.sort((a, b) => {
         const attrsA = getPostAttributes(a);
         const attrsB = getPostAttributes(b);
@@ -160,34 +421,31 @@ async function loadAllDailyArticles() {
         return new Date(dateB).getTime() - new Date(dateA).getTime();
     });
     
-    // 生成 HTML（通用格式）
-    container.innerHTML = uniquePosts.map(post => {
-        const attrs = getPostAttributes(post);
-        const title = attrs.title || attrs.slug;
-        const slug = attrs.slug;
-        const description = getArticleDescription(post);
-        
-        // 日期處理
-        let date = '';
-        const dateSource = attrs.date || attrs.publishedAt || attrs.createdAt;
-        if (dateSource) {
-            const d = new Date(dateSource);
-            if (!isNaN(d.getTime())) {
-                date = d.toISOString().split('T')[0];
-            }
+    // 清空容器
+    container.innerHTML = '';
+    
+    // 根據結構類型決定容器標籤
+    if (structure.containerTag === 'ul' && container.tagName !== 'UL') {
+        // 如果應該是 <ul> 但容器是 <div>，需要轉換
+        const ul = document.createElement('ul');
+        ul.className = container.className;
+        container.parentNode.replaceChild(ul, container);
+        container = ul;
+    } else if (structure.containerTag === 'div' && container.tagName !== 'DIV') {
+        // 如果應該是 <div> 但容器是 <ul>，需要轉換
+        const div = document.createElement('div');
+        div.className = container.className;
+        container.parentNode.replaceChild(div, container);
+        container = div;
+    }
+    
+    // 生成 HTML
+    uniquePosts.forEach((post, index) => {
+        const html = generateArticleHTML(post, structure, site, index);
+        if (html) {
+            container.insertAdjacentHTML('beforeend', html);
         }
-        
-        // 通用 HTML 結構（自動適配）
-        return `
-            <li class="all-daily-item">
-                <a href="articles/${slug}.html">
-                    <h2>${title}</h2>
-                    ${date ? `<span class="publish-date">${date}</span>` : ''}
-                </a>
-                ${description ? `<p>${description}</p>` : ''}
-            </li>
-        `;
-    }).join('');
+    });
     
     console.log(`✅ [${site}] 已載入 ${uniquePosts.length} 篇文章`);
 }
@@ -234,6 +492,8 @@ async function updateNavDailyLink(site) {
 // =========================================================
 // 頁面載入完成後執行
 // =========================================================
+console.log('📋 all-daily-articles-cms.js 腳本已載入');
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         loadAllDailyArticles();

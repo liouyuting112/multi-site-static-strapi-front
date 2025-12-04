@@ -151,22 +151,49 @@ function detectContainerStructure(container) {
     const parentClass = parent ? (parent.className || '') : '';
     
     // 檢測每日精選結構
-    if (containerClass.includes('daily-article-list') || containerClass.includes('widget-list')) {
+    if (containerClass.includes('daily-article-list') || 
+        containerClass.includes('widget-list') ||
+        containerClass.includes('daily-list') ||
+        containerClass.includes('daily-articles-list') ||
+        containerClass.includes('daily-cards-grid') ||
+        containerClass.includes('daily-magazine-list')) {
+        
         // 檢查是否有圖片
         const hasImage = container.querySelector('img') !== null;
         const hasWidget = parentClass.includes('widget') || containerClass.includes('widget');
         
+        // site1: widget 風格
         if (hasWidget) {
             return { type: 'daily', style: 'widget', hasImage: true };
         }
         
-        // 檢查是否是 site6 風格（.daily-articles .daily-article-list）
+        // site7: .daily-list（側邊欄列表）
+        if (containerClass.includes('daily-list') && parentClass.includes('daily-sidebar')) {
+            return { type: 'daily', style: 'sidebar-list', hasImage: false };
+        }
+        
+        // site8: .daily-articles-list（section 列表）
+        if (containerClass.includes('daily-articles-list')) {
+            return { type: 'daily', style: 'section-list', hasImage: false };
+        }
+        
+        // site9: .daily-cards-grid（卡片網格，有圖片）
+        if (containerClass.includes('daily-cards-grid')) {
+            return { type: 'daily', style: 'card-grid', hasImage: true };
+        }
+        
+        // site10: .daily-magazine-list（雜誌列表）
+        if (containerClass.includes('daily-magazine-list')) {
+            return { type: 'daily', style: 'magazine-list', hasImage: false };
+        }
+        
+        // site6: .daily-articles .daily-article-list
         if (parentClass.includes('daily-articles') || parentClass.includes('daily-section')) {
             return { type: 'daily', style: 'simple-list', hasImage: false };
         }
         
         // 檢查是否有卡片結構
-        const firstItem = container.querySelector('li, a');
+        const firstItem = container.querySelector('li, a, article');
         if (firstItem) {
             const itemClass = firstItem.className || '';
             if (itemClass.includes('card') || itemClass.includes('feed')) {
@@ -181,9 +208,29 @@ function detectContainerStructure(container) {
     }
     
     // 檢測固定文章結構
-    if (containerClass.includes('fixed-articles') || containerClass.includes('featured') || containerClass.includes('masonry') || containerClass.includes('card-grid')) {
+    if (containerClass.includes('fixed-articles') || containerClass.includes('fixed-cards-grid') || containerClass.includes('fixed-magazine-grid') || containerClass.includes('featured') || containerClass.includes('masonry') || containerClass.includes('card-grid')) {
         const hasGrid = containerClass.includes('grid') || containerClass.includes('masonry');
-        const hasCard = containerClass.includes('card') || container.querySelector('.card, .post-entry, .article-row');
+        const hasCard = containerClass.includes('card') || container.querySelector('.card, .post-entry, .article-row, .card-item, .fixed-article-card');
+        
+        // site9: .fixed-cards-grid（卡片網格）
+        if (containerClass.includes('fixed-cards-grid')) {
+            return { type: 'fixed', style: 'fixed-cards-grid', hasImage: true };
+        }
+        
+        // site10: .fixed-magazine-grid（雜誌網格）
+        if (containerClass.includes('fixed-magazine-grid')) {
+            return { type: 'fixed', style: 'fixed-magazine-grid', hasImage: true };
+        }
+        
+        // site7: .fixed-articles-zone
+        if (containerClass.includes('fixed-articles-zone')) {
+            return { type: 'fixed', style: 'fixed-zone', hasImage: true };
+        }
+        
+        // site8: .fixed-articles-list
+        if (containerClass.includes('fixed-articles-list')) {
+            return { type: 'fixed', style: 'fixed-list', hasImage: true };
+        }
         
         if (hasGrid) {
             return { type: 'fixed', style: 'grid', hasImage: true };
@@ -273,8 +320,55 @@ function generateArticleHTML(post, structure, site, index = 0) {
                     </div>
                 </a>
             `;
+        } else if (structure.style === 'sidebar-list') {
+            // site7 風格：側邊欄列表
+            return `
+                <li class="daily-item">
+                    <div class="daily-item-header">
+                        <a href="articles/${slug}.html" class="daily-item-title">${title}</a>
+                        ${date ? `<span class="daily-item-date">${date}</span>` : ''}
+                    </div>
+                    ${description ? `<p class="daily-item-excerpt">${description}</p>` : ''}
+                </li>
+            `;
+        } else if (structure.style === 'section-list') {
+            // site8 風格：section 列表
+            return `
+                <li class="daily-list-item">
+                    <div class="daily-item-top">
+                        <a href="articles/${slug}.html" class="daily-item-title">${title}</a>
+                        ${date ? `<span class="daily-item-date">${date}</span>` : ''}
+                    </div>
+                    ${description ? `<p class="daily-item-text">${description}</p>` : ''}
+                </li>
+            `;
+        } else if (structure.style === 'card-grid') {
+            // site9 風格：卡片網格（有圖片）
+            return `
+                <article class="daily-card">
+                    <a href="articles/${slug}.html" class="daily-card-image">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </a>
+                    <div class="daily-card-content">
+                        ${date ? `<div class="daily-date">${date}</div>` : ''}
+                        <h3><a href="articles/${slug}.html" style="color: #ffffff;">${title}</a></h3>
+                        ${description ? `<p>${description}</p>` : ''}
+                    </div>
+                </article>
+            `;
+        } else if (structure.style === 'magazine-list') {
+            // site10 風格：雜誌列表
+            return `
+                <li class="daily-magazine-item">
+                    <div class="daily-item-header">
+                        <a href="articles/${slug}.html" class="daily-item-title">${title}</a>
+                        ${date ? `<span class="daily-item-date">${date}</span>` : ''}
+                    </div>
+                    ${description ? `<p class="daily-item-text">${description}</p>` : ''}
+                </li>
+            `;
         } else {
-            // 簡單列表風格（site4, site6-10）
+            // 簡單列表風格（site4, site6）
             return `
                 <li class="daily-article-item">
                     <div class="daily-article-link">
@@ -287,7 +381,68 @@ function generateArticleHTML(post, structure, site, index = 0) {
         }
     } else if (structure.type === 'fixed') {
         // 固定文章結構
-        if (structure.style === 'grid' || structure.style === 'card') {
+        if (structure.style === 'fixed-cards-grid') {
+            // site9 風格：固定卡片網格
+            return `
+                <article class="card-item">
+                    <a href="articles/${slug}.html" class="card-image">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </a>
+                    <div class="card-body">
+                        <h3><a href="articles/${slug}.html">${title}</a></h3>
+                        <a href="articles/${slug}.html">
+                            <p>${description}</p>
+                        </a>
+                    </div>
+                </article>
+            `;
+        } else if (structure.style === 'fixed-magazine-grid') {
+            // site10 風格：雜誌網格
+            return `
+                <article class="magazine-card">
+                    <a href="articles/${slug}.html" class="magazine-image">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </a>
+                    <div class="magazine-content">
+                        <h3><a href="articles/${slug}.html">${title}</a></h3>
+                        <a href="articles/${slug}.html">
+                            <p>${description}</p>
+                        </a>
+                    </div>
+                </article>
+            `;
+        } else if (structure.style === 'fixed-list') {
+            // site8 風格：固定文章列表
+            return `
+                <article class="fixed-article-item">
+                    <a href="articles/${slug}.html" class="fixed-article-image">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </a>
+                    <div class="fixed-article-content">
+                        <h3><a href="articles/${slug}.html">${title}</a></h3>
+                        <a href="articles/${slug}.html">
+                            <p>${description}</p>
+                        </a>
+                    </div>
+                </article>
+            `;
+        } else if (structure.style === 'fixed-zone') {
+            // site7 風格：固定文章區域
+            return `
+                <article class="fixed-article-card">
+                    <a href="articles/${slug}.html" class="fixed-article-media">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </a>
+                    <div class="fixed-article-body">
+                        <h3><a href="articles/${slug}.html">${title}</a></h3>
+                        <a href="articles/${slug}.html">
+                            <p>${description}</p>
+                        </a>
+                    </div>
+                </article>
+            `;
+        } else if (structure.style === 'grid' || structure.style === 'card') {
+            // site6 風格：固定文章網格
             return `
                 <article class="fixed-article-card">
                     <a href="articles/${slug}.html" class="fixed-article-media">
@@ -325,13 +480,17 @@ async function loadDailyForSite(site) {
     
     // 自動尋找每日精選容器
     const selectors = [
-        '.daily-article-list',
-        '.daily-widget .widget-list',
-        '.daily-picks .daily-grid',
-        '.feed-section .feed-list',
-        '.daily-list',
+        '.daily-article-list',        // site2, site4, site6
+        '.daily-widget .widget-list', // site1
+        '.daily-picks .daily-grid',   // site3
+        '.feed-section .feed-list',   // site5
+        '.daily-list',                // site7
+        '.daily-articles-list',       // site8
+        '.daily-cards-grid',          // site9
+        '.daily-magazine-list',       // site10
         '[class*="daily"] ul',
-        '[class*="daily"] ol'
+        '[class*="daily"] ol',
+        '[class*="daily"] div'
     ];
     
     let dailyContainer = null;
@@ -436,7 +595,11 @@ async function loadDailyForSite(site) {
 async function loadFixedForSite(site) {
     // 自動尋找固定文章容器
     const selectors = [
-        '.fixed-articles-grid',
+        '.fixed-cards-grid',           // site9
+        '.fixed-articles-grid',        // site6
+        '.fixed-articles-zone',        // site7
+        '.fixed-articles-list',        // site8
+        '.fixed-magazine-grid',        // site10
         '.fixed-articles',
         '.featured-posts',
         '.featured-works .masonry-grid',

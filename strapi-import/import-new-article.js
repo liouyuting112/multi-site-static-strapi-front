@@ -4,6 +4,11 @@
 // 例如: node import-new-article.js site1 2025-12-03
 // =========================================================
 
+// 修復 SSL/TLS 問題（必須在最前面）
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+import './ssl-fix.js';
+
 import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';

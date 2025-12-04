@@ -16,6 +16,11 @@
 //   或 npm run import-pages （package.json 會加 script）
 // =========================================================
 
+// 修復 SSL/TLS 問題（必須在最前面）
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+import './ssl-fix.js';
+
 import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';

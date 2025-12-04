@@ -237,7 +237,7 @@ img {
 .article-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 36px;
 }
 
 .article-card {
@@ -248,7 +248,7 @@ img {
   display: flex;
   flex-direction: column;
   height: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
 }
 
 .article-card-thumb {
@@ -297,6 +297,7 @@ img {
   border-radius: 14px;
   padding: 14px 14px 12px 14px;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+  margin-top: 12px;
 }
 
 .daily-articles h2 {
@@ -317,7 +318,7 @@ img {
 }
 
 .daily-article-list li {
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .daily-article-link {
@@ -422,7 +423,8 @@ img {
   border-radius: 14px;
   padding: 14px 12px 14px 12px;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  margin-top: 6px;
 }
 
 .side-box h2 {
@@ -544,7 +546,7 @@ img {
 
   .content-layout {
     grid-template-columns: 1fr;
-    row-gap: 18px;
+    row-gap: 32px;
   }
 }
 
