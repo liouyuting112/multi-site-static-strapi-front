@@ -2,36 +2,38 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <title>聯絡我們｜球感實驗室</title>
-  <meta name="description" content="想分享你的社區足球故事、實驗過的訓練方法或合作提案，都可以透過這個頁面聯絡球感實驗室。">
+  <title>聯絡我們｜籃球筆記本</title>
+  <meta name="description" content="想分享你的業餘籃球故事、實驗過的訓練方法或合作提案，都可以透過這個頁面聯絡籃球筆記本。">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="keywords" content="聯絡足球網站,社區球隊合作,足球訓練分享">
-  <link rel="canonical" href="https://example.com/site6/contact.html">
+  <meta name="keywords" content="聯絡籃球網站,業餘球隊合作,籃球訓練分享">
+  <link rel="canonical" href="https://example.com/site7/contact.html">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header class="site-header">
-  <div class="site-header-inner">
-    <a href="index.html" class="site-logo">
-      <img src="https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/site6-contact.webp?raw=true" alt="桌上擺著筆電與筆記本，旁邊有一顆磨舊的足球" loading="lazy">
-      <span class="site-logo-text">球感實驗室</span>
+  <div class="header-container">
+    <a href="index.html" class="logo-section">
+      <img src="https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/site7-contact.webp?raw=true" alt="桌上擺著筆電與筆記本，旁邊有一顆籃球" loading="lazy">
+      <span class="logo-text">籃球筆記本</span>
     </a>
-    <nav class="main-nav" aria-label="主選單">
-      <button class="menu-toggle" aria-label="切換主選單">
+    <nav class="main-navigation" aria-label="主選單">
+      <button class="menu-toggle-btn" aria-label="切換主選單">
+        <span></span>
+        <span></span>
         <span></span>
       </button>
-      <ul class="nav-links">
+      <ul class="nav-menu">
         <li><a href="index.html">首頁</a></li>
         <li><a href="about.html">關於我們</a></li>
         <li><a href="contact.html">聯絡我們</a></li>
         <li><a href="privacy.html">隱私政策</a></li>
-        <li>
-          <a href="#" class="nav-dropdown-toggle">固定文章分類</a>
-          <div class="nav-dropdown-menu">
+        <li class="dropdown-wrapper">
+          <a href="#" class="dropdown-trigger">固定文章分類</a>
+          <div class="dropdown-content">
             <ul>
-              <li><a href="articles/pressure-defense.html">高位壓迫怎麼練</a></li>
-              <li><a href="articles/community-training.html">社區球隊訓練日誌</a></li>
-              <li><a href="articles/position-sense.html">位置感與第一步判斷</a></li>
+              <li><a href="articles/shooting-rhythm.html">投籃節奏怎麼抓</a></li>
+              <li><a href="articles/weekly-training.html">業餘球隊一周兩練</a></li>
+              <li><a href="articles/defense-positioning.html">防守站位的小細節</a></li>
             </ul>
           </div>
         </li>
@@ -41,16 +43,16 @@
   </div>
 </header>
 
-<main class="page-wrapper">
-  <section class="info-layout" aria-labelledby="contact-title">
-    <div class="info-main">
+<main class="main-content">
+  <section class="info-page-layout" aria-labelledby="contact-title">
+    <div class="info-main-section">
       <h1 id="contact-title">聯絡我們：把你的球場故事也丟進來</h1>
       <h2>你可以和我們聊的主題</h2>
-      <p>只要是和社區或業餘足球相關的經驗，其實都很歡迎。比方說，你在青少年球隊嘗試過某種熱身流程，覺得孩子的專注度明顯提升，或者你自己在三十歲之後重回球場，對體能分配有一些新的感受。這些內容在大型媒體上也許不會被放大，在這裡我們會盡量把細節聽完。</p>
+      <p>只要是和業餘籃球相關的經驗，其實都很歡迎。比方說，你在青少年球隊嘗試過某種熱身流程，覺得孩子的專注度明顯提升，或者你自己在三十歲之後重回球場，對體能分配有一些新的感受。這些內容在大型媒體上也許不會被放大，在這裡我們會盡量把細節聽完。</p>
       <p>如果你本身是教練、物理治療師或運動防護員，也很期待你指出我們文章裡不夠精準的地方。有時我們會參考像英國運動醫學期刊或世界衛生組織對身體活動的建議，再試著用比較生活化的方式寫出來，但實際場上的判斷還是需要你們的提醒。</p>
 
       <h2>聯絡表單</h2>
-      <form class="contact-form" aria-label="聯絡表單">
+      <form class="contact-form-grid" aria-label="聯絡表單">
         <div>
           <label for="name">姓名或暱稱</label>
           <input id="name" name="name" type="text" autocomplete="name">
@@ -59,16 +61,16 @@
           <label for="email">電子郵件</label>
           <input id="email" name="email" type="email" autocomplete="email">
         </div>
-        <div class="contact-form-full">
+        <div class="form-field-full">
           <label for="topic">想聊的主題</label>
-          <input id="topic" name="topic" type="text" placeholder="例如：邊路壓迫、防守輪轉、青少年訓練節奏">
+          <input id="topic" name="topic" type="text" placeholder="例如：投籃節奏、防守輪轉、青少年訓練節奏">
         </div>
-        <div class="contact-form-full">
+        <div class="form-field-full">
           <label for="message">內容</label>
           <textarea id="message" name="message" placeholder="可以簡單描述你們球隊的情況，或是哪一場比賽讓你印象特別深。"></textarea>
         </div>
-        <div class="contact-form-full">
-          <button type="submit" class="contact-submit">送出訊息</button>
+        <div class="form-field-full">
+          <button type="submit" class="submit-button">送出訊息</button>
         </div>
       </form>
 
@@ -76,12 +78,12 @@
       <p>我們多半是在晚上練球前後或周末早上整理信件，通常會在三到五個工作天內回覆。有時遇到連續比賽的週期，可能會稍微延後，如果拖得太久也歡迎再提醒一下。若內容牽涉到醫療或長期傷勢，我們會建議你同時諮詢專業醫療單位，像是各國官方衛生單位對運動傷害的建議資料。</p>
     </div>
 
-    <aside class="info-side">
-      <div class="info-card">
+    <aside>
+      <div class="sidebar-widget">
         <h2>寫信前可以先想的幾件事</h2>
         <p>你可以先簡單想一下，這次聯絡最想解決的問題是什麼，是想找到新的訓練做法，還是只是想有人一起聽你講完那場比賽。這會幫助我們在回覆時抓到比較適合的角度。</p>
       </div>
-      <div class="info-card">
+      <div class="sidebar-widget">
         <h2>我們參考的外部資源</h2>
         <p>在回覆與體能或健康相關的問題時，我們會參考世界衛生組織對身體活動與運動建議的公開資料，再搭配實際練球經驗調整說法。</p>
         <p><a href="https://www.who.int/teams/health-promotion/physical-activity" rel="nofollow">世界衛生組織身體活動建議</a></p>
@@ -91,8 +93,8 @@
 </main>
 
 <footer class="site-footer">
-  <div class="site-footer-inner">
-    <div>© 2025 球感實驗室</div>
+  <div class="footer-container">
+    <div>© 2025 籃球筆記本</div>
     <div>你的來信很可能會成為下一篇文章的起點。</div>
   </div>
 </footer>
@@ -100,6 +102,4 @@
 <script src="js/main.js"></script>
 </body>
 </html>
-
-
 
