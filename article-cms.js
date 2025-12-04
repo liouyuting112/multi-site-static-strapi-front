@@ -5,7 +5,7 @@
 console.log('✅ article-cms.js 已載入');
 
 // ?�置：�??��?你�? Strapi 設�?修改
-const STRAPI_URL = 'http://localhost:1337'; // 如�? Strapi ?��?端�??��?你�? Strapi URL
+const STRAPI_URL = 'https://tidy-fireworks-ad201d981a.strapiapp.com'; // 如�? Strapi ?��?端�??��?你�? Strapi URL
 const STRAPI_API_TOKEN = ''; // 如�? Public 角色?��??��??�以?�空；否?�填??API Token
 
 // =========================================================

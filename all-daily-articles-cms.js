@@ -3,7 +3,7 @@
 // =========================================================
 
 // 配置：請根據你的 Strapi 設定修改
-const STRAPI_URL = 'http://localhost:1337'; // 如果 Strapi 在遠端，改成你的 Strapi URL
+const STRAPI_URL = 'https://tidy-fireworks-ad201d981a.strapiapp.com'; // Strapi Cloud URL
 const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；否則填入 API Token
 
 const ITEMS_PER_PAGE = 10; // 每頁顯示 10 篇文章
@@ -66,6 +66,7 @@ function extractFirstParagraph(htmlContent, maxLength = 28) {
         return text.substring(0, maxLength) + '...';
     }
     return text;
+    
 }
 
 // =========================================================
