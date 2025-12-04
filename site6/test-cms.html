@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>測試 CMS 腳本</title>
+</head>
+<body>
+  <h1>測試 CMS 腳本載入</h1>
+  <div id="test-result">載入中...</div>
+  
+  <ul class="daily-article-list">
+    <li class="daily-article-item"><p>載入中...</p></li>
+  </ul>
+  
+  <script>
+    console.log('📋 測試頁面載入');
+    console.log('📍 當前路徑:', window.location.pathname);
+    console.log('📍 當前 URL:', window.location.href);
+  </script>
+  
+  <script src="../home-cms.js" data-site="site6"></script>
+  
+  <script>
+    setTimeout(() => {
+      const result = document.getElementById('test-result');
+      const list = document.querySelector('.daily-article-list');
+      if (list && list.children.length > 0) {
+        result.textContent = '✅ CMS 腳本已載入並執行';
+        result.style.color = 'green';
+      } else {
+        result.textContent = '❌ CMS 腳本未執行或未找到文章';
+        result.style.color = 'red';
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
+

@@ -152,7 +152,8 @@
         <span class="section-desc">從三個角度慢慢把球感穩下來</span>
       </div>
     </div>
-    <div class="fixed-cards-grid">
+    <!-- <manual-update> -->
+            <div class="fixed-cards-grid">
       <article class="card-item">
         <a href="articles/serve-rhythm.html" class="card-image">
           <img src="https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/site9-fixed1.webp?raw=true" alt="球員準備發球，手部動作細節清晰可見" loading="lazy">
@@ -163,6 +164,7 @@
             <p>以前我老是覺得發球要快，結果反而被對手的預判接回來。後來慢慢記錄每一次成功發球的時機，才發現原來最關鍵的不是速度，而是你拋球前那半秒的節奏感…</p>
           </a>
         </div>
+            <!-- </manual-update> -->
       </article>
 
       <article class="card-item">
@@ -199,25 +201,12 @@
         <span class="section-desc">今天先從一個看起來不太重要的細節開始聊</span>
       </div>
     </div>
-    <div class="daily-cards-grid">
-      <article class="daily-card">
-        <div class="daily-date">2025-12-03</div>
-        <h3><a href="articles/2025-12-03.html" style="color: #ffffff;">網球拍為什麼會在你沒注意時悄悄變重</a></h3>
-        <p>那天我在球場邊看到朋友的新拍，遠看跟去年那支差不多，結果他擊球的聲音卻變得比較悶，握在手裡的回饋也不太一樣…</p>
-      </article>
-
-      <article class="daily-card">
-        <div class="daily-date">2025-12-04</div>
-        <h3><a href="articles/2025-12-04.html" style="color: #ffffff;">球場地板的材質和你擊球時的手感</a></h3>
-        <p>如果你有在不同場地打過球，可能也有那種感覺：明明擊球方式差不多，手感卻不是太硬就是太軟，尤其下雨後更明顯…</p>
-      </article>
-
-      <article class="daily-card">
-        <div class="daily-date">2025-12-05</div>
-        <h3><a href="articles/2025-12-05.html" style="color: #ffffff;">裁判判決前的那幾秒鐘你在想什麼</a></h3>
-        <p>有一次友誼賽我們請到地區聯賽的裁判，開打前他只說了幾句話，真正有用的反而是那些看起來很日常的小手勢…</p>
-      </article>
+    <!-- <auto-update> -->
+            <div class="daily-cards-grid">
+      <!-- 文章列表將由 home-cms.js 動態載入 -->
+      <article class="daily-card"><p style="text-align: center; padding: 2rem; color: #ffffff;">載入中...</p></article>
     </div>
+            <!-- </auto-update> -->
   </section>
 </main>
 
@@ -229,6 +218,7 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="../home-cms.js" data-site="site9"></script></script>
 </body>
 </html>
 

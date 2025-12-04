@@ -99,25 +99,43 @@ async function fetchPostsFromStrapi(site, category, options = {}) {
             headers['Authorization'] = `Bearer ${STRAPI_API_TOKEN}`;
         }
         
-        console.log(`🔍 [${site}] 請求 ${category} 文章: ${url}`);
+        console.log(`🔍 [${site}] 請求 ${category} 文章:`);
+        console.log(`   URL: ${url}`);
+        console.log(`   Headers:`, headers);
+        
         const response = await fetch(url, { headers });
+        
+        console.log(`📥 [${site}] 收到回應: ${response.status} ${response.statusText}`);
         
         if (!response.ok) {
             const errorText = await response.text();
             console.error(`❌ [${site}] Strapi API 錯誤 (${response.status}):`, errorText);
+            console.error(`   完整 URL: ${url}`);
             return [];
         }
         
         const data = await response.json();
+        console.log(`📊 [${site}] API 回應數據:`, data);
         
         if (data.data && Array.isArray(data.data)) {
             console.log(`✅ [${site}] 成功獲取 ${data.data.length} 篇 ${category} 文章`);
+            if (data.data.length > 0) {
+                console.log(`   第一篇文章:`, {
+                    id: data.data[0].id,
+                    slug: getPostAttributes(data.data[0]).slug,
+                    title: getPostAttributes(data.data[0]).title
+                });
+            }
             return data.data;
         }
         
+        console.warn(`⚠️ [${site}] 數據結構不符合預期:`, data);
         return [];
     } catch (error) {
         console.error(`❌ [${site}] 抓取 ${category} 文章失敗:`, error);
+        console.error(`   錯誤類型:`, error.name);
+        console.error(`   錯誤訊息:`, error.message);
+        console.error(`   錯誤堆疊:`, error.stack);
         return [];
     }
 }
@@ -303,6 +321,8 @@ function generateArticleHTML(post, structure, site, index = 0) {
 // 載入「每日精選」文章
 // =========================================================
 async function loadDailyForSite(site) {
+    console.log(`🔍 [${site}] 開始尋找每日精選容器...`);
+    
     // 自動尋找每日精選容器
     const selectors = [
         '.daily-article-list',
@@ -319,12 +339,16 @@ async function loadDailyForSite(site) {
         dailyContainer = document.querySelector(selector);
         if (dailyContainer) {
             console.log(`✅ [${site}] 找到每日精選容器: ${selector}`);
+            console.log(`   容器內容:`, dailyContainer.innerHTML.substring(0, 100));
             break;
         }
     }
     
     if (!dailyContainer) {
-        console.warn(`⚠️ [${site}] 找不到每日精選容器`);
+        console.error(`❌ [${site}] 找不到每日精選容器`);
+        console.error(`   嘗試的選擇器:`, selectors);
+        console.error(`   當前頁面所有元素數量:`, document.querySelectorAll('*').length);
+        console.error(`   包含 'daily' 的元素:`, Array.from(document.querySelectorAll('[class*="daily"]')).map(el => el.className));
         return;
     }
     
@@ -570,28 +594,54 @@ async function updateNavDailyLink(site) {
 // =========================================================
 // 主程序：自動執行
 // =========================================================
-document.addEventListener('DOMContentLoaded', function() {
+
+// 立即執行，不等待 DOMContentLoaded（確保腳本已載入）
+console.log('📋 home-cms.js 腳本已載入');
+console.log('📍 STRAPI_URL:', STRAPI_URL);
+console.log('📍 當前 URL:', window.location.href);
+console.log('📍 當前路徑:', window.location.pathname);
+
+function initCMS() {
     // 從 script 標籤的 data-site 屬性獲取網站名稱
     const scriptTag = document.querySelector('script[data-site]');
-    if (!scriptTag) {
+    let site = null;
+    
+    if (scriptTag) {
+        site = scriptTag.getAttribute('data-site');
+        console.log('✅ 從 data-site 屬性獲取網站名稱:', site);
+    } else {
         // 嘗試從 URL 路徑提取
         const path = window.location.pathname;
+        console.log('🔍 嘗試從 URL 路徑提取網站名稱:', path);
         const match = path.match(/\/(site\d+)\//);
-        if (!match) {
-            console.warn('⚠️ 無法識別網站名稱');
-            return;
+        if (match) {
+            site = match[1];
+            console.log('✅ 從 URL 路徑提取到網站名稱:', site);
+        } else {
+            // 嘗試其他路徑格式
+            const pathParts = path.split('/').filter(p => p);
+            for (const part of pathParts) {
+                if (/^site\d+$/.test(part)) {
+                    site = part;
+                    console.log('✅ 從路徑部分提取到網站名稱:', site);
+                    break;
+                }
+            }
         }
-        var site = match[1];
-    } else {
-        var site = scriptTag.getAttribute('data-site');
     }
     
     if (!site) {
-        console.warn('⚠️ 網站名稱為空');
+        console.error('❌ 無法識別網站名稱');
+        console.error('   當前路徑:', window.location.pathname);
+        console.error('   所有 script 標籤:', Array.from(document.querySelectorAll('script')).map(s => ({
+            src: s.src,
+            'data-site': s.getAttribute('data-site')
+        })));
         return;
     }
     
     console.log(`🚀 [${site}] 開始載入 Strapi 內容...`);
+    console.log(`   目標 Strapi URL: ${STRAPI_URL}`);
     
     // 同時載入每日精選和固定文章
     Promise.all([
@@ -602,5 +652,16 @@ document.addEventListener('DOMContentLoaded', function() {
         updateNavDailyLink(site);
     }).catch((error) => {
         console.error(`❌ [${site}] Strapi 內容載入失敗:`, error);
+        console.error('   錯誤詳情:', error.stack);
     });
-});
+}
+
+// 如果 DOM 已經載入完成，立即執行
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCMS);
+    console.log('⏳ 等待 DOMContentLoaded 事件...');
+} else {
+    // DOM 已經載入完成，立即執行
+    console.log('✅ DOM 已載入，立即執行');
+    initCMS();
+}

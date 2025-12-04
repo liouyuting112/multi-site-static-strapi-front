@@ -148,12 +148,14 @@
 
   <section class="content-zones">
     <!-- manual-content-block: 固定主題文章 -->
-    <div class="fixed-articles-zone">
+    <!-- <manual-update> -->
+            <div class="fixed-articles-zone">
       <div class="zone-header">
         <div>
           <h2>固定主題文章</h2>
           <span class="zone-subtitle">從三個角度慢慢把球感穩下來</span>
         </div>
+            <!-- </manual-update> -->
       </div>
       <div class="articles-row">
         <article class="article-tile">
@@ -195,33 +197,16 @@
     </div>
 
     <!-- auto-content-block: 每日精選文章列表 -->
-    <aside class="daily-sidebar">
+    <!-- <auto-update> -->
+            <aside class="daily-sidebar">
       <h2>每日精選文章</h2>
       <p style="font-size: 13px; color: #b0b0b0; margin-bottom: 16px;">今天先從一個看起來不太重要的細節開始聊。</p>
       <ul class="daily-list">
-        <li class="daily-item">
-          <div class="daily-item-header">
-            <a href="articles/2025-12-03.html" class="daily-item-title">籃球為什麼會在你沒注意時悄悄變重</a>
-            <span class="daily-item-date">2025-12-03</span>
-          </div>
-          <p class="daily-item-excerpt">那天我在球場邊看到朋友的新球，遠看跟去年那顆差不多，結果他運球的聲音卻變得比較悶，抓在手裡的回饋也不太一樣…</p>
-        </li>
-        <li class="daily-item">
-          <div class="daily-item-header">
-            <a href="articles/2025-12-04.html" class="daily-item-title">球場地板的材質和你運球時的手感</a>
-            <span class="daily-item-date">2025-12-04</span>
-          </div>
-          <p class="daily-item-excerpt">如果你有在不同場地打過球，可能也有那種感覺：明明運球方式差不多，球卻不是彈太高就是滑不動，尤其下雨後更明顯…</p>
-        </li>
-        <li class="daily-item">
-          <div class="daily-item-header">
-            <a href="articles/2025-12-05.html" class="daily-item-title">裁判吹哨前的那半秒鐘你在想什麼</a>
-            <span class="daily-item-date">2025-12-05</span>
-          </div>
-          <p class="daily-item-excerpt">有一次友誼賽我們請到地區聯賽的裁判，開打前他只說了幾句話，真正有用的反而是那些看起來很日常的小手勢…</p>
-        </li>
+        <!-- 文章列表將由 home-cms.js 動態載入 -->
+        <li class="daily-item"><p style="text-align: center; padding: 2rem; color: #b0b0b0;">載入中...</p></li>
       </ul>
     </aside>
+            <!-- </auto-update> -->
   </section>
 </main>
 
@@ -233,6 +218,7 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="../home-cms.js" data-site="site7"></script></script>
 </body>
 </html>
 
