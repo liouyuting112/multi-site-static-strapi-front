@@ -5,7 +5,7 @@
 console.log('✅ article-cms.js 已載入');
 
 // ?�置：�??��?你�? Strapi 設�?修改
-const STRAPI_URL = 'https://tidy-fireworks-ad201d981a.strapiapp.com'; // 如�? Strapi ?��?端�??��?你�? Strapi URL
+const STRAPI_URL = 'https://effortless-whisper-83765d99df.strapiapp.com'; // Strapi Cloud URL
 const STRAPI_API_TOKEN = ''; // 如�? Public 角色?��??��??�以?�空；否?�填??API Token
 
 // =========================================================
@@ -307,18 +307,29 @@ async function loadArticleContent() {
     }
     
     const attrs = getPostAttributes(articleData);
-    const htmlContent = attrs.html;
+    let htmlContent = attrs.html;
+    
+    // 如果有 imageUrl，在內容開頭插入圖片
+    if (attrs.imageUrl && htmlContent) {
+        // 檢查內容開頭是否已經有圖片
+        if (!htmlContent.includes('<img') && !htmlContent.includes('hero-image')) {
+            // 在內容開頭插入 hero image
+            htmlContent = `<div class="hero-image" style="margin-bottom: 2rem;">
+                <img src="${attrs.imageUrl}" alt="${attrs.title || ''}" style="width: 100%; height: auto;" loading="lazy">
+            </div>\n\n${htmlContent}`;
+        }
+    }
     
     if (!htmlContent) {
-        console.warn('?��? ?��?沒�? html ?�容');
+        console.warn('⚠️  找不到 html 內容');
         return;
     }
     
-    // ?��??��??�容
+    // 提取文章內容
     let extractedContent = extractArticleContent(htmlContent);
     
     if (!extractedContent) {
-        console.warn('?��? ?��??��??��??�容');
+        console.warn('⚠️  無法提取文章內容');
         return;
     }
     
