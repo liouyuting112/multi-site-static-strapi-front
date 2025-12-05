@@ -49,11 +49,6 @@ if exist "!CONFIG_FILE!" (
     for /f "tokens=2 delims==" %%a in ('findstr /C:"STRAPI_URL=" "!CONFIG_FILE!"') do set STRAPI_URL=%%a
     for /f "tokens=2 delims==" %%a in ('findstr /C:"STRAPI_TOKEN=" "!CONFIG_FILE!"') do set STRAPI_TOKEN=%%a
     
-    :: 如果設定檔中沒有值，使用預設值
-    if "!GITHUB_URL!"=="" set GITHUB_URL=https://github.com/liouyuting112/static-sites-monorepo-1
-    if "!GITHUB_BRANCH!"=="" set GITHUB_BRANCH=main
-    if "!STRAPI_URL!"=="" set STRAPI_URL=https://effortless-whisper-83765d99df.strapiapp.com
-    
     echo    GitHub: !GITHUB_URL!
     echo    Strapi: !STRAPI_URL!
     echo.
@@ -65,11 +60,11 @@ if exist "!CONFIG_FILE!" (
 ) else (
     :setup_config
     echo 📍 請設定 GitHub 倉庫位置
-    echo    預設值：https://github.com/liouyuting112/static-sites-monorepo-1
-    set /p GITHUB_URL="GitHub 倉庫 URL（直接按 Enter 使用預設值）: "
+    set /p GITHUB_URL="GitHub 倉庫 URL: "
     if "!GITHUB_URL!"=="" (
-        set GITHUB_URL=https://github.com/liouyuting112/static-sites-monorepo-1
-        echo    使用預設值：!GITHUB_URL!
+        echo ❌ GitHub 倉庫 URL 不能為空
+        pause
+        exit /b 1
     )
     
     set /p GITHUB_BRANCH="分支名稱（預設：main）: "
@@ -77,17 +72,19 @@ if exist "!CONFIG_FILE!" (
     
     echo.
     echo 📍 請設定 Strapi 後台位置
-    echo    預設值：https://effortless-whisper-83765d99df.strapiapp.com
-    set /p STRAPI_URL="Strapi URL（直接按 Enter 使用預設值）: "
+    set /p STRAPI_URL="Strapi URL: "
     if "!STRAPI_URL!"=="" (
-        set STRAPI_URL=https://effortless-whisper-83765d99df.strapiapp.com
-        echo    使用預設值：!STRAPI_URL!
+        echo ❌ Strapi URL 不能為空
+        pause
+        exit /b 1
     )
     
-    echo.
-    echo 📍 請設定 Strapi API Token
-    echo    如果留空，將使用 upload-site-to-strapi.js 中的預設值
-    set /p STRAPI_TOKEN="Strapi API Token（可留空）: "
+    set /p STRAPI_TOKEN="Strapi API Token: "
+    if "!STRAPI_TOKEN!"=="" (
+        echo ❌ Strapi API Token 不能為空
+        pause
+        exit /b 1
+    )
     
     (
         echo GITHUB_URL=!GITHUB_URL!
@@ -95,16 +92,6 @@ if exist "!CONFIG_FILE!" (
         echo STRAPI_URL=!STRAPI_URL!
         echo STRAPI_TOKEN=!STRAPI_TOKEN!
     ) > "!CONFIG_FILE!"
-    echo ✅ 設定已儲存到：!CONFIG_FILE!
-)
-
-:: 確保有預設值（如果設定檔中沒有）
-if "!GITHUB_URL!"=="" set GITHUB_URL=https://github.com/liouyuting112/static-sites-monorepo-1
-if "!GITHUB_BRANCH!"=="" set GITHUB_BRANCH=main
-if "!STRAPI_URL!"=="" set STRAPI_URL=https://effortless-whisper-83765d99df.strapiapp.com
-if "!STRAPI_TOKEN!"=="" (
-    echo ⚠️  未設定 Strapi Token，將使用 upload-site-to-strapi.js 中的預設值
-    set STRAPI_TOKEN=
 )
 
 echo ✅ 設定完成
@@ -225,50 +212,27 @@ echo [4/5] 推送到 GitHub
 echo ========================================
 echo.
 
-:: 找到 Git 倉庫根目錄
-set GIT_ROOT=
-cd /d "!PARENT_FOLDER!"
-
-:: 向上查找 .git 目錄
-:find_git_root
-if exist ".git" (
-    set GIT_ROOT=%CD%
-    goto :found_git
-)
-cd ..
-if "%CD%"=="%CD:~0,3%" (
-    :: 已經到根目錄，沒找到 Git 倉庫
-    set GIT_ROOT=!PARENT_FOLDER!
-    goto :init_git
-)
-goto :find_git_root
-
-:found_git
-cd /d "!GIT_ROOT!"
-echo ✅ 找到 Git 倉庫根目錄：%CD%
-goto :setup_git
-
-:init_git
+:: 檢查是否在 Git 倉庫中
 cd /d "!PARENT_FOLDER!"
 cd ..
-echo ⚠️  當前目錄不是 Git 倉庫
-echo    正在初始化 Git 倉庫...
-git init
-set GIT_ROOT=%CD%
 
-:setup_git
-cd /d "!GIT_ROOT!"
-echo 📍 當前工作目錄：%CD%
-echo.
-
-git remote set-url origin "!GITHUB_URL!" 2>nul
+git rev-parse --git-dir >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
+    echo ⚠️  當前目錄不是 Git 倉庫
+    echo    正在初始化 Git 倉庫...
+    git init
     git remote add origin "!GITHUB_URL!"
+    git branch -M !GITHUB_BRANCH!
+) else (
+    echo ✅ 找到 Git 倉庫
+    git remote set-url origin "!GITHUB_URL!" 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        git remote add origin "!GITHUB_URL!"
+    )
+    :: 確保分支存在
+    git checkout -b !GITHUB_BRANCH! 2>nul
+    git branch -M !GITHUB_BRANCH! 2>nul
 )
-
-:: 確保分支存在
-git checkout -b !GITHUB_BRANCH! 2>nul
-git branch -M !GITHUB_BRANCH! 2>nul
 
 :: 檢查 Git 設定
 git config user.name >nul 2>&1
@@ -288,52 +252,27 @@ echo 📤 正在加入檔案到 Git...
 echo.
 
 :: 加入所有網站資料夾
+set HAS_CHANGES=0
 for %%F in (!SITE_FOLDERS!) do (
     set CURRENT_FOLDER=%%F
     set CURRENT_FOLDER=!CURRENT_FOLDER:"=!
     for %%S in ("!CURRENT_FOLDER!") do set CURRENT_NAME=%%~nxS
     
-    echo    處理：!CURRENT_NAME!
-    echo    完整路徑：!CURRENT_FOLDER!
+    echo    檢查：!CURRENT_NAME!
     
-    :: 計算相對路徑
-    set RELATIVE_PATH=!CURRENT_FOLDER!
-    set RELATIVE_PATH=!RELATIVE_PATH:%GIT_ROOT%\=!
-    
-    echo    相對路徑：!RELATIVE_PATH!
-    
-    :: 嘗試使用相對路徑
-    if exist "!RELATIVE_PATH!" (
-        echo    加入（相對路徑）：!RELATIVE_PATH!
-        git add "!RELATIVE_PATH!"
+    :: 檢查檔案是否存在
+    if exist "!CURRENT_NAME!" (
+        echo    加入：!CURRENT_NAME!
+        git add "!CURRENT_NAME!"
         if !ERRORLEVEL! EQU 0 (
-            echo    ✅ 已加入：!CURRENT_NAME!
-        ) else (
-            echo    ⚠️  相對路徑加入失敗，嘗試完整路徑...
-            git add "!CURRENT_FOLDER!"
-            if !ERRORLEVEL! EQU 0 (
-                echo    ✅ 已加入（完整路徑）：!CURRENT_NAME!
-            ) else (
-                echo    ❌ 加入失敗：!CURRENT_NAME!
-            )
+            set HAS_CHANGES=1
         )
     ) else (
-        :: 直接使用完整路徑
-        echo    加入（完整路徑）：!CURRENT_FOLDER!
-        git add "!CURRENT_FOLDER!"
-        if !ERRORLEVEL! EQU 0 (
-            echo    ✅ 已加入：!CURRENT_NAME!
-        ) else (
-            echo    ❌ 加入失敗：!CURRENT_NAME!
-        )
+        echo    ⚠️  檔案不存在：!CURRENT_NAME!
     )
 )
 
 echo.
-echo 📝 檢查 Git 狀態...
-git status --short
-echo.
-
 echo 📝 正在檢查變更...
 git status --short | findstr /R "." >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
@@ -347,8 +286,6 @@ if %ERRORLEVEL% EQU 0 (
         echo    ✅ Commit 成功
     ) else (
         echo    ❌ Commit 失敗
-        echo    錯誤詳情：
-        git status
         pause
         exit /b 1
     )
@@ -365,11 +302,9 @@ if %ERRORLEVEL% EQU 0 (
         git commit -m "批量新增網站: !SITE_COUNT! 個網站 - %date_str% %time_str%"
         if %ERRORLEVEL% NEQ 0 (
             echo    ❌ Commit 失敗
-            git status
             pause
             exit /b 1
         )
-        echo    ✅ Commit 成功
     ) else (
         echo    ⚠️  沒有任何變更或新檔案
         echo    跳過 commit
@@ -387,17 +322,9 @@ git log --oneline -1 >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo ❌ 沒有 commit 可以推送
     echo    請確認檔案已正確加入並 commit
-    echo.
-    echo    當前狀態：
-    git status
-    echo.
     pause
     exit /b 1
 )
-
-echo    最後一個 commit：
-git log --oneline -1
-echo.
 
 :: 使用 force push
 echo    使用 force push 推送...
@@ -414,14 +341,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo 4. 是否有 commit 可以推送
     echo.
     echo 調試資訊：
-    echo    當前目錄：%CD%
-    echo    遠端倉庫：
-    git remote -v
-    echo    分支狀態：
-    git branch -a
-    echo    最後 commit：
     git log --oneline -1
-    echo    狀態：
     git status --short
     echo.
     pause

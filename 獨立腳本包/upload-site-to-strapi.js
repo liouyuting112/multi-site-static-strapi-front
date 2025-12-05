@@ -175,6 +175,50 @@ function extractDateFromSlug(slug) {
     return dateMatch ? dateMatch[1] : null;
 }
 
+function extractExcerpt(rawHtml) {
+    if (!rawHtml) return null;
+    
+    // 提取 <article> 內容
+    let articleContent = null;
+    const articleMatch = rawHtml.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+    if (articleMatch) {
+        articleContent = articleMatch[1];
+    }
+    
+    if (!articleContent) return null;
+    
+    // 移除標題和元數據
+    articleContent = articleContent.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
+    articleContent = articleContent.replace(/發布於[\s\S]*?<\/p>/i, '').trim();
+    articleContent = articleContent.replace(/發布日期[\s\S]*?<\/p>/i, '').trim();
+    
+    // 提取第一個 <p> 標籤的內容
+    const firstPMatch = articleContent.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+    if (firstPMatch) {
+        let text = firstPMatch[1];
+        // 移除 HTML 標籤
+        text = text.replace(/<[^>]+>/g, '');
+        // 清理空白
+        text = text.trim().replace(/\s+/g, ' ');
+        // 限制長度為 150 字元
+        if (text.length > 150) {
+            text = text.substring(0, 147) + '...';
+        }
+        return text || null;
+    }
+    
+    // 如果沒有 <p>，嘗試提取純文字
+    const textContent = articleContent.replace(/<[^>]+>/g, '').trim().replace(/\s+/g, ' ');
+    if (textContent.length > 0) {
+        if (textContent.length > 150) {
+            return textContent.substring(0, 147) + '...';
+        }
+        return textContent;
+    }
+    
+    return null;
+}
+
 // =========================================================
 // Strapi API 函數
 // =========================================================
@@ -345,6 +389,7 @@ async function uploadPosts(siteFolderPath, siteName) {
         const title = extractTitle(raw, slug);
         const htmlContent = extractArticleHtml(raw);
         const imageUrl = extractImageUrl(raw);
+        const excerpt = extractExcerpt(raw);
         
         const isDaily = /^\d{4}-\d{2}-\d{2}$/.test(slug);
         const category = isDaily ? 'daily' : 'fixed';
@@ -372,6 +417,7 @@ async function uploadPosts(siteFolderPath, siteName) {
         }
         
         if (imageUrl) payload.imageUrl = imageUrl;
+        if (excerpt) payload.excerpt = excerpt;
 
         try {
             const existing = await findExistingPost(siteName, slug);

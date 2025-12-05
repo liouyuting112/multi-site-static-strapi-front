@@ -58,9 +58,14 @@ function getArticleDescription(post, maxLength = 100) {
     
     if (attrs.html) {
         const extracted = extractFirstParagraph(attrs.html, maxLength);
-        if (extracted && extracted !== attrs.title) {
+        if (extracted && extracted !== attrs.title && extracted.trim().length > 0) {
             return extracted;
         }
+    }
+    
+    // 如果都沒有，嘗試從 description 欄位提取
+    if (attrs.description && attrs.description.trim() && attrs.description !== attrs.title) {
+        return attrs.description.length > maxLength ? attrs.description.substring(0, maxLength) + '...' : attrs.description;
     }
     
     return '';
@@ -172,9 +177,11 @@ function detectContainerStructure(container) {
             return { type: 'daily', style: 'sidebar-list', hasImage: false };
         }
         
-        // site8: .daily-articles-list（section 列表）
+        // site8: .daily-articles-list（section 列表，有圖片）
         if (containerClass.includes('daily-articles-list')) {
-            return { type: 'daily', style: 'section-list', hasImage: false };
+            // site8 應該有圖片，檢查結構
+            const hasImageInStructure = container.querySelector('img') !== null;
+            return { type: 'daily', style: 'section-list', hasImage: hasImageInStructure || true };
         }
         
         // site9: .daily-cards-grid（卡片網格，有圖片）
@@ -187,8 +194,14 @@ function detectContainerStructure(container) {
             return { type: 'daily', style: 'magazine-list', hasImage: false };
         }
         
-        // site6: .daily-articles .daily-article-list
-        if (parentClass.includes('daily-articles') || parentClass.includes('daily-section')) {
+        // site2: .daily-articles .daily-article-list（有圖片）
+        if (parentClass.includes('daily-articles') && containerClass.includes('daily-article-list')) {
+            // site2 一定有圖片
+            return { type: 'daily', style: 'card', hasImage: true };
+        }
+        
+        // site6: .daily-articles .daily-article-list（無圖片）
+        if (parentClass.includes('daily-section')) {
             return { type: 'daily', style: 'simple-list', hasImage: false };
         }
         
@@ -252,7 +265,9 @@ function generateArticleHTML(post, structure, site, index = 0) {
     const attrs = getPostAttributes(post);
     const title = attrs.title || attrs.slug || '無標題';
     const slug = attrs.slug;
-    const description = getArticleDescription(post, 150);
+    // 根據類型設定描述長度：固定文章用較短，每日文章用較長
+    const descMaxLength = structure.type === 'fixed' ? 100 : 150;
+    const description = getArticleDescription(post, descMaxLength);
     
     // 日期處理
     let date = '';
@@ -332,9 +347,14 @@ function generateArticleHTML(post, structure, site, index = 0) {
                 </li>
             `;
         } else if (structure.style === 'section-list') {
-            // site8 風格：section 列表
+            // site8 風格：section 列表（有圖片）
             return `
                 <li class="daily-list-item">
+                    ${structure.hasImage ? `
+                    <a href="articles/${slug}.html" class="daily-item-image">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                    </a>
+                    ` : ''}
                     <div class="daily-item-top">
                         <a href="articles/${slug}.html" class="daily-item-title">${title}</a>
                         ${date ? `<span class="daily-item-date">${date}</span>` : ''}
@@ -521,7 +541,9 @@ async function loadDailyForSite(site) {
     console.log(`📋 [${site}] 檢測到結構類型:`, structure);
     
     // 獲取文章（最近 7 天，只取 isFeatured=true）
-    const posts = await fetchPostsFromStrapi(site, 'daily', { daysLimit: 7, featuredOnly: true, limit: 10 });
+    // site8 暫時不限制 featuredOnly，因為可能沒有設定
+    const featuredOnly = site !== 'site8';
+    const posts = await fetchPostsFromStrapi(site, 'daily', { daysLimit: 7, featuredOnly: featuredOnly, limit: 10 });
     
     if (posts.length === 0) {
         console.log(`⚠️ [${site}] 沒有找到每日精選文章`);
