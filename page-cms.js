@@ -6,19 +6,16 @@
 function getStrapiUrl() {
     const hostname = window.location.hostname;
     
-    // 開發環境：預覽網址（包含 git- 或隨機字串的 vercel.app）
-    // 正式環境：標準專案名稱的 vercel.app（如 multi-site-static-strapi-front.vercel.app）
-    if (hostname.includes('vercel.app')) {
-        // 如果是標準格式（專案名稱.vercel.app），使用正式環境
-        if (hostname === 'multi-site-static-strapi-front.vercel.app' || 
-            hostname.match(/^[a-z0-9-]+\.vercel\.app$/)) {
-            return 'https://effortless-whisper-83765d99df.strapiapp.com'; // 正式環境
-        }
-        // 其他格式（包含 git- 或隨機字串），使用開發環境
-        return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    console.log('🔍 檢測環境，hostname:', hostname);
+    
+    // 正式環境：只有完全匹配標準網址才使用正式環境
+    if (hostname === 'multi-site-static-strapi-front.vercel.app') {
+        console.log('✅ 使用正式環境 Strapi');
+        return 'https://effortless-whisper-83765d99df.strapiapp.com'; // 正式環境
     }
     
-    // 本地開發或其他環境，預設使用開發環境
+    // 開發環境：所有其他情況（預覽網址、本地開發等）
+    console.log('✅ 使用開發環境 Strapi');
     return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
 }
 
