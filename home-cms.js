@@ -2,8 +2,27 @@
 // 通用 Strapi CMS 動態內容載入腳本
 // 支援所有網站，自動適配 HTML 結構
 // =========================================================
-// 配置：請根據你的 Strapi 設定修改
-const STRAPI_URL = 'https://effortless-whisper-83765d99df.strapiapp.com'; // Strapi Cloud URL
+// 根據環境自動選擇 Strapi URL
+function getStrapiUrl() {
+    const hostname = window.location.hostname;
+    
+    // 開發環境：預覽網址（包含 git- 或隨機字串的 vercel.app）
+    // 正式環境：標準專案名稱的 vercel.app（如 multi-site-static-strapi-front.vercel.app）
+    if (hostname.includes('vercel.app')) {
+        // 如果是標準格式（專案名稱.vercel.app），使用正式環境
+        if (hostname === 'multi-site-static-strapi-front.vercel.app' || 
+            hostname.match(/^[a-z0-9-]+\.vercel\.app$/)) {
+            return 'https://effortless-whisper-83765d99df.strapiapp.com'; // 正式環境
+        }
+        // 其他格式（包含 git- 或隨機字串），使用開發環境
+        return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    }
+    
+    // 本地開發或其他環境，預設使用開發環境
+    return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+}
+
+const STRAPI_URL = getStrapiUrl();
 const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；否則填入 API Token
 
 // =========================================================
@@ -206,6 +225,11 @@ function detectContainerStructure(container) {
             return { type: 'daily', style: 'card', hasImage: true };
         }
         
+        // site4: .daily-article-list（有圖片）
+        if (containerClass.includes('daily-article-list') && parentClass.includes('daily-articles')) {
+            return { type: 'daily', style: 'simple-list', hasImage: true };
+        }
+        
         // site6: .daily-articles .daily-article-list（無圖片）
         if (parentClass.includes('daily-section')) {
             return { type: 'daily', style: 'simple-list', hasImage: false };
@@ -395,15 +419,32 @@ function generateArticleHTML(post, structure, site, index = 0) {
             `;
         } else {
             // 簡單列表風格（site4, site6）
-            return `
-                <li class="daily-article-item">
-                    <div class="daily-article-link">
-                        <a href="articles/${slug}.html">${title}</a>
-                        ${date ? `<span class="publish-date">${date}</span>` : ''}
-                    </div>
-                    ${description ? `<p class="daily-snippet">${description}</p>` : ''}
-                </li>
-            `;
+            if (structure.hasImage) {
+                // site4 風格：有圖片，圖片在左，文字在右
+                return `
+                    <li class="daily-article-item">
+                        <div class="daily-article-link">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                            <div class="daily-content">
+                                <h3><a href="articles/${slug}.html">${title}</a></h3>
+                                ${description ? `<p class="daily-snippet">${description}</p>` : ''}
+                                ${date ? `<span class="publish-date">${date}</span>` : ''}
+                            </div>
+                        </div>
+                    </li>
+                `;
+            } else {
+                // site6 風格：無圖片
+                return `
+                    <li class="daily-article-item">
+                        <div class="daily-article-link">
+                            <a href="articles/${slug}.html">${title}</a>
+                            ${date ? `<span class="publish-date">${date}</span>` : ''}
+                        </div>
+                        ${description ? `<p class="daily-snippet">${description}</p>` : ''}
+                    </li>
+                `;
+            }
         }
     } else if (structure.type === 'fixed') {
         // 固定文章結構
