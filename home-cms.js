@@ -1,7 +1,9 @@
 // =========================================================
 // 通用 Strapi CMS 動態內容載入腳本
 // 支援所有網站，自動適配 HTML 結構
+// 版本: 2025-12-05-v3 (環境自動切換 - 強制動態獲取)
 // =========================================================
+console.log('🚀 home-cms.js v3 已載入 - 環境自動切換版本');
 // 根據環境自動選擇 Strapi URL
 function getStrapiUrl() {
     const hostname = window.location.hostname;
@@ -100,7 +102,9 @@ async function fetchPostsFromStrapi(site, category, options = {}) {
     try {
         const { daysLimit = null, featuredOnly = false, limit = 100 } = options;
         
-        let url = `${STRAPI_URL}/api/posts?filters[site][$eq]=${site}&filters[category][$eq]=${category}`;
+        // 動態獲取 Strapi URL（確保使用正確的環境）
+        const strapiUrl = getStrapiUrl();
+        let url = `${strapiUrl}/api/posts?filters[site][$eq]=${site}&filters[category][$eq]=${category}`;
         
         // 每日精選預設只抓 isFeatured=true 的文章
         if (category === 'daily' && featuredOnly) {
@@ -826,9 +830,18 @@ async function updateNavDailyLink(site) {
 
 // 立即執行，不等待 DOMContentLoaded（確保腳本已載入）
 console.log('📋 home-cms.js 腳本已載入');
-console.log('📍 STRAPI_URL:', STRAPI_URL);
+// 顯示當前環境資訊
+const currentStrapiUrl = getStrapiUrl();
+console.log('🔍 檢測環境，hostname:', window.location.hostname);
+console.log('📍 STRAPI_URL (動態):', currentStrapiUrl);
+console.log('📍 STRAPI_URL (初始):', STRAPI_URL);
 console.log('📍 當前 URL:', window.location.href);
 console.log('📍 當前路徑:', window.location.pathname);
+
+// 警告：如果初始值和動態值不同
+if (STRAPI_URL !== currentStrapiUrl) {
+    console.warn('⚠️ 注意：初始 STRAPI_URL 與動態值不同，將使用動態值');
+}
 
 function initCMS() {
     // 從 script 標籤的 data-site 屬性獲取網站名稱
@@ -870,7 +883,8 @@ function initCMS() {
     }
     
     console.log(`🚀 [${site}] 開始載入 Strapi 內容...`);
-    console.log(`   目標 Strapi URL: ${STRAPI_URL}`);
+    const strapiUrl = getStrapiUrl();
+    console.log(`   目標 Strapi URL: ${strapiUrl}`);
     
     // 同時載入每日精選和固定文章
     Promise.all([
