@@ -60,24 +60,16 @@ if exist "!CONFIG_FILE!" (
 ) else (
     :setup_config
     echo 📍 請設定 GitHub 倉庫位置
-    set /p GITHUB_URL="GitHub 倉庫 URL: "
-    if "!GITHUB_URL!"=="" (
-        echo ❌ GitHub 倉庫 URL 不能為空
-        pause
-        exit /b 1
-    )
+    set /p GITHUB_URL="GitHub 倉庫 URL（預設：https://github.com/liouyuting112/multi-site-static-strapi-front.git）: "
+    if "!GITHUB_URL!"=="" set GITHUB_URL=https://github.com/liouyuting112/multi-site-static-strapi-front.git
     
     set /p GITHUB_BRANCH="分支名稱（預設：main）: "
     if "!GITHUB_BRANCH!"=="" set GITHUB_BRANCH=main
     
     echo.
     echo 📍 請設定 Strapi 後台位置
-    set /p STRAPI_URL="Strapi URL: "
-    if "!STRAPI_URL!"=="" (
-        echo ❌ Strapi URL 不能為空
-        pause
-        exit /b 1
-    )
+    set /p STRAPI_URL="Strapi URL（預設：https://effortless-whisper-83765d99df.strapiapp.com）: "
+    if "!STRAPI_URL!"=="" set STRAPI_URL=https://effortless-whisper-83765d99df.strapiapp.com
     
     set /p STRAPI_TOKEN="Strapi API Token: "
     if "!STRAPI_TOKEN!"=="" (
@@ -203,7 +195,7 @@ echo ========================================
 echo.
 
 :: =========================================================
-:: 步驟 4：推送到 GitHub
+:: 步驟 4：推送到 GitHub（使用正確的方式）
 :: =========================================================
 
 echo.
@@ -212,10 +204,11 @@ echo [4/5] 推送到 GitHub
 echo ========================================
 echo.
 
-:: 檢查是否在 Git 倉庫中
+:: 切換到專案根目錄
 cd /d "!PARENT_FOLDER!"
 cd ..
 
+:: 檢查是否在 Git 倉庫中
 git rev-parse --git-dir >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo ⚠️  當前目錄不是 Git 倉庫
@@ -225,10 +218,17 @@ if %ERRORLEVEL% NEQ 0 (
     git branch -M !GITHUB_BRANCH!
 ) else (
     echo ✅ 找到 Git 倉庫
-    git remote set-url origin "!GITHUB_URL!" 2>nul
+    
+    :: 檢查 remote 是否存在
+    git remote get-url origin >nul 2>&1
     if %ERRORLEVEL% NEQ 0 (
+        echo    正在添加 remote...
         git remote add origin "!GITHUB_URL!"
+    ) else (
+        echo    正在更新 remote URL...
+        git remote set-url origin "!GITHUB_URL!"
     )
+    
     :: 確保分支存在
     git checkout -b !GITHUB_BRANCH! 2>nul
     git branch -M !GITHUB_BRANCH! 2>nul
@@ -251,29 +251,18 @@ echo.
 echo 📤 正在加入檔案到 Git...
 echo.
 
-:: 加入所有網站資料夾
-set HAS_CHANGES=0
-for %%F in (!SITE_FOLDERS!) do (
-    set CURRENT_FOLDER=%%F
-    set CURRENT_FOLDER=!CURRENT_FOLDER:"=!
-    for %%S in ("!CURRENT_FOLDER!") do set CURRENT_NAME=%%~nxS
-    
-    echo    檢查：!CURRENT_NAME!
-    
-    :: 檢查檔案是否存在
-    if exist "!CURRENT_NAME!" (
-        echo    加入：!CURRENT_NAME!
-        git add "!CURRENT_NAME!"
-        if !ERRORLEVEL! EQU 0 (
-            set HAS_CHANGES=1
-        )
-    ) else (
-        echo    ⚠️  檔案不存在：!CURRENT_NAME!
-    )
+:: 先 pull 最新的變更（避免衝突）
+echo    正在拉取遠端變更...
+git pull origin !GITHUB_BRANCH! --allow-unrelated-histories 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo    ⚠️  無法拉取遠端變更（可能是新倉庫，繼續執行）
 )
 
-echo.
-echo 📝 正在檢查變更...
+:: 加入所有變更
+echo    正在加入所有變更...
+git add .
+
+:: 檢查是否有變更
 git status --short | findstr /R "." >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo    發現變更，建立 commit...
@@ -281,7 +270,10 @@ if %ERRORLEVEL% EQU 0 (
     set date_str=%datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2%
     set time_str=%datetime:~8,2%:%datetime:~10,2%:%datetime:~12,2%
     
-    git commit -m "批量新增網站: !SITE_COUNT! 個網站 - %date_str% %time_str%"
+    set /p COMMIT_MSG="請輸入 commit 訊息（預設：批量更新網站）: "
+    if "!COMMIT_MSG!"=="" set COMMIT_MSG=批量更新網站 - %date_str% %time_str%
+    
+    git commit -m "!COMMIT_MSG!"
     if %ERRORLEVEL% EQU 0 (
         echo    ✅ Commit 成功
     ) else (
@@ -291,24 +283,6 @@ if %ERRORLEVEL% EQU 0 (
     )
 ) else (
     echo    ⚠️  沒有變更需要 commit
-    echo    正在檢查是否有未追蹤的檔案...
-    git status --porcelain | findstr "^??" >nul 2>&1
-    if %ERRORLEVEL% EQU 0 (
-        echo    發現未追蹤的檔案，加入所有檔案...
-        git add .
-        for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I
-        set date_str=%datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2%
-        set time_str=%datetime:~8,2%:%datetime:~10,2%:%datetime:~12,2%
-        git commit -m "批量新增網站: !SITE_COUNT! 個網站 - %date_str% %time_str%"
-        if %ERRORLEVEL% NEQ 0 (
-            echo    ❌ Commit 失敗
-            pause
-            exit /b 1
-        )
-    ) else (
-        echo    ⚠️  沒有任何變更或新檔案
-        echo    跳過 commit
-    )
 )
 
 echo.
@@ -320,15 +294,13 @@ echo.
 :: 檢查是否有 commit 可以推送
 git log --oneline -1 >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo ❌ 沒有 commit 可以推送
-    echo    請確認檔案已正確加入並 commit
-    pause
-    exit /b 1
+    echo ⚠️  沒有 commit 可以推送
+    echo    所有變更已經是最新的
+    goto :skip_push
 )
 
-:: 使用 force push
-echo    使用 force push 推送...
-git push -u origin !GITHUB_BRANCH! --force
+:: 推送到 GitHub（不使用 force）
+git push -u origin !GITHUB_BRANCH!
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -338,17 +310,19 @@ if %ERRORLEVEL% NEQ 0 (
     echo 1. GitHub 認證是否正確
     echo 2. 網路連線是否正常
     echo 3. 倉庫權限是否正確
-    echo 4. 是否有 commit 可以推送
+    echo 4. 是否有衝突需要解決
     echo.
-    echo 調試資訊：
-    git log --oneline -1
-    git status --short
+    echo 如果遇到衝突，請手動執行：
+    echo   git pull origin main --allow-unrelated-histories
+    echo   git push -u origin main
     echo.
     pause
     exit /b 1
 )
 
 echo ✅ 已推送到 GitHub
+
+:skip_push
 echo.
 
 :: =========================================================

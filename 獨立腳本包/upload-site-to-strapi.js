@@ -158,16 +158,62 @@ function extractTitle(rawHtml, fallback) {
 }
 
 function extractImageUrl(rawHtml) {
+    let imageUrl = null;
+    
+    // 優先從 <article> 中提取
     const articleMatch = rawHtml.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
     if (articleMatch) {
         const imgMatch = articleMatch[1].match(/<img[^>]+src=["']([^"']+)["']/i);
-        if (imgMatch) return imgMatch[1];
+        if (imgMatch) imageUrl = imgMatch[1];
     }
     
-    const imgMatch = rawHtml.match(/<img[^>]+src=["']([^"']+)["']/i);
-    if (imgMatch) return imgMatch[1];
+    // 如果沒有，從整個 HTML 中提取
+    if (!imageUrl) {
+        const imgMatch = rawHtml.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (imgMatch) imageUrl = imgMatch[1];
+    }
     
-    return null;
+    if (!imageUrl) return null;
+    
+    // 如果是完整的 URL（http:// 或 https://），直接返回
+    if (/^https?:\/\//i.test(imageUrl)) {
+        return imageUrl;
+    }
+    
+    // 如果是相對路徑，轉換為完整的 GitHub raw URL
+    // 處理相對路徑，例如：../../shared-assets/site5-hero.webp
+    if (imageUrl.startsWith('../') || imageUrl.startsWith('./') || (!imageUrl.startsWith('/') && !imageUrl.startsWith('http'))) {
+        // 移除所有相對路徑標記（../ 和 ./）
+        // 使用循環確保移除所有 ../ 和 ./
+        let cleanPath = imageUrl;
+        while (cleanPath.startsWith('../')) {
+            cleanPath = cleanPath.substring(3); // 移除 '../'
+        }
+        while (cleanPath.startsWith('./')) {
+            cleanPath = cleanPath.substring(2); // 移除 './'
+        }
+        
+        // 確保路徑是乾淨的（移除開頭的多餘斜線）
+        cleanPath = cleanPath.replace(/^\/+/, '');
+        
+        // GitHub 倉庫 URL
+        const GITHUB_REPO = 'https://github.com/liouyuting112/static-sites-monorepo-1';
+        const GITHUB_BRANCH = 'main';
+        
+        // 轉換為 GitHub raw URL
+        return `${GITHUB_REPO}/blob/${GITHUB_BRANCH}/${cleanPath}?raw=true`;
+    }
+    
+    // 如果是絕對路徑（以 / 開頭），轉換為 GitHub raw URL
+    if (imageUrl.startsWith('/')) {
+        const GITHUB_REPO = 'https://github.com/liouyuting112/static-sites-monorepo-1';
+        const GITHUB_BRANCH = 'main';
+        const cleanPath = imageUrl.substring(1).replace(/^\/+/, ''); // 移除開頭的 / 和多餘斜線
+        return `${GITHUB_REPO}/blob/${GITHUB_BRANCH}/${cleanPath}?raw=true`;
+    }
+    
+    // 其他情況，返回原始值
+    return imageUrl;
 }
 
 function extractDateFromSlug(slug) {
@@ -200,9 +246,9 @@ function extractExcerpt(rawHtml) {
         text = text.replace(/<[^>]+>/g, '');
         // 清理空白
         text = text.trim().replace(/\s+/g, ' ');
-        // 限制長度為 150 字元
-        if (text.length > 150) {
-            text = text.substring(0, 147) + '...';
+        // 限制長度為 25 字元
+        if (text.length > 25) {
+            text = text.substring(0, 25) + '...';
         }
         return text || null;
     }
@@ -210,8 +256,8 @@ function extractExcerpt(rawHtml) {
     // 如果沒有 <p>，嘗試提取純文字
     const textContent = articleContent.replace(/<[^>]+>/g, '').trim().replace(/\s+/g, ' ');
     if (textContent.length > 0) {
-        if (textContent.length > 150) {
-            return textContent.substring(0, 147) + '...';
+        if (textContent.length > 25) {
+            return textContent.substring(0, 25) + '...';
         }
         return textContent;
     }

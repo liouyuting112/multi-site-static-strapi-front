@@ -20,7 +20,7 @@ function getPostAttributes(item) {
 // =========================================================
 // 工具函數：從 HTML 內容中提取第一段文本作為描述
 // =========================================================
-function extractFirstParagraph(htmlContent, maxLength = 100) {
+function extractFirstParagraph(htmlContent, maxLength = 25) {
     if (!htmlContent) return '';
     
     const tempDiv = document.createElement('div');
@@ -49,13 +49,19 @@ function extractFirstParagraph(htmlContent, maxLength = 100) {
 // =========================================================
 // 工具函數：獲取文章描述
 // =========================================================
-function getArticleDescription(post, maxLength = 100) {
+function getArticleDescription(post, maxLength = 25) {
     const attrs = getPostAttributes(post);
     
-    if (attrs.excerpt && attrs.excerpt.trim() && attrs.excerpt !== attrs.title) {
-        return attrs.excerpt.length > maxLength ? attrs.excerpt.substring(0, maxLength) + '...' : attrs.excerpt;
+    // 優先使用 excerpt（內文描述）
+    if (attrs.excerpt && attrs.excerpt.trim()) {
+        // 檢查是否與標題相同
+        const excerptText = attrs.excerpt.trim();
+        if (excerptText !== attrs.title && excerptText.length > 0) {
+            return excerptText.length > maxLength ? excerptText.substring(0, maxLength) + '...' : excerptText;
+        }
     }
     
+    // 如果沒有 excerpt，從 html 提取第一段
     if (attrs.html) {
         const extracted = extractFirstParagraph(attrs.html, maxLength);
         if (extracted && extracted !== attrs.title && extracted.trim().length > 0) {
@@ -265,8 +271,8 @@ function generateArticleHTML(post, structure, site, index = 0) {
     const attrs = getPostAttributes(post);
     const title = attrs.title || attrs.slug || '無標題';
     const slug = attrs.slug;
-    // 根據類型設定描述長度：固定文章用較短，每日文章用較長
-    const descMaxLength = structure.type === 'fixed' ? 100 : 150;
+    // 描述長度限制：25個字
+    const descMaxLength = 25;
     const description = getArticleDescription(post, descMaxLength);
     
     // 日期處理
@@ -711,7 +717,7 @@ async function loadFixedForSite(site) {
                 // 更新描述
                 const pTag = link.querySelector('p');
                 if (pTag) {
-                    pTag.textContent = getArticleDescription(post, 150);
+                    pTag.textContent = getArticleDescription(post, 25);
                 }
             }
         });
