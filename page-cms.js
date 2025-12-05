@@ -2,8 +2,27 @@
 // Strapi CMS 靜態頁面載入腳本（About, Contact, Privacy）
 // =========================================================
 
-// 配置：請根據你的 Strapi 設定修改
-const STRAPI_URL = 'https://effortless-whisper-83765d99df.strapiapp.com'; // Strapi Cloud URL
+// 根據環境自動選擇 Strapi URL
+function getStrapiUrl() {
+    const hostname = window.location.hostname;
+    
+    // 開發環境：預覽網址（包含 git- 或隨機字串的 vercel.app）
+    // 正式環境：標準專案名稱的 vercel.app（如 multi-site-static-strapi-front.vercel.app）
+    if (hostname.includes('vercel.app')) {
+        // 如果是標準格式（專案名稱.vercel.app），使用正式環境
+        if (hostname === 'multi-site-static-strapi-front.vercel.app' || 
+            hostname.match(/^[a-z0-9-]+\.vercel\.app$/)) {
+            return 'https://effortless-whisper-83765d99df.strapiapp.com'; // 正式環境
+        }
+        // 其他格式（包含 git- 或隨機字串），使用開發環境
+        return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    }
+    
+    // 本地開發或其他環境，預設使用開發環境
+    return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+}
+
+const STRAPI_URL = getStrapiUrl();
 const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；否則填入 API Token
 
 // =========================================================
