@@ -1,0 +1,57 @@
+{
+  "rewrites": [
+    {
+      "source": "/星座解密站cds006/:path*",
+      "destination": "/星座解密站cds006/:path*"
+    },
+    {
+      "source": "/cds006/:path*",
+      "destination": "/星座解密站cds006/:path*"
+    },
+    {
+      "source": "/星象觀測台so007/:path*",
+      "destination": "/星象觀測台so007/:path*"
+    },
+    {
+      "source": "/so007/:path*",
+      "destination": "/星象觀測台so007/:path*"
+    },
+    {
+      "source": "/占星智慧館awh008/:path*",
+      "destination": "/占星智慧館awh008/:path*"
+    },
+    {
+      "source": "/awh008/:path*",
+      "destination": "/占星智慧館awh008/:path*"
+    },
+    {
+      "source": "/星座運勢屋zfh009/:path*",
+      "destination": "/星座運勢屋zfh009/:path*"
+    },
+    {
+      "source": "/zfh009/:path*",
+      "destination": "/星座運勢屋zfh009/:path*"
+    },
+    {
+      "source": "/星宿探索家sce010/:path*",
+      "destination": "/星宿探索家sce010/:path*"
+    },
+    {
+      "source": "/sce010/:path*",
+      "destination": "/星宿探索家sce010/:path*"
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ]
+}
