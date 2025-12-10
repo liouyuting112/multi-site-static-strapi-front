@@ -1,9 +1,7 @@
 // =========================================================
 // 通用 Strapi CMS 動態內容載入腳本
 // 支援所有網站，自動適配 HTML 結構
-// 版本: 2025-12-05-v3 (環境自動切換 - 強制動態獲取)
 // =========================================================
-console.log('🚀 home-cms.js v3 已載入 - 環境自動切換版本');
 // 根據環境自動選擇 Strapi URL
 function getStrapiUrl() {
     const hostname = window.location.hostname;
@@ -21,7 +19,8 @@ function getStrapiUrl() {
     return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
 }
 
-const STRAPI_URL = getStrapiUrl();
+// 動態獲取 Strapi URL（不使用固定值，避免緩存問題）
+// const STRAPI_URL = getStrapiUrl(); // 已移除，改為在函數中動態獲取
 const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；否則填入 API Token
 
 // =========================================================
@@ -834,14 +833,9 @@ console.log('📋 home-cms.js 腳本已載入');
 const currentStrapiUrl = getStrapiUrl();
 console.log('🔍 檢測環境，hostname:', window.location.hostname);
 console.log('📍 STRAPI_URL (動態):', currentStrapiUrl);
-console.log('📍 STRAPI_URL (初始):', STRAPI_URL);
 console.log('📍 當前 URL:', window.location.href);
 console.log('📍 當前路徑:', window.location.pathname);
-
-// 警告：如果初始值和動態值不同
-if (STRAPI_URL !== currentStrapiUrl) {
-    console.warn('⚠️ 注意：初始 STRAPI_URL 與動態值不同，將使用動態值');
-}
+console.log('✅ 所有 API 請求將使用動態 Strapi URL:', currentStrapiUrl);
 
 function initCMS() {
     // 從 script 標籤的 data-site 屬性獲取網站名稱

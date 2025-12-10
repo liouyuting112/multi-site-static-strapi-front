@@ -1,1 +1,0 @@
-# multi-site-static-strapi-front

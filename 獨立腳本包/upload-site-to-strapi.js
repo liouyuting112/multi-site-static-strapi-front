@@ -24,11 +24,17 @@ const headers = {
 const siteFolderPath = process.argv[2];
 
 if (!siteFolderPath) {
-    console.log('使用方法：node upload-site-to-strapi.js <網站資料夾路徑>');
+    console.log('使用方法：node upload-site-to-strapi.js <網站資料夾路徑> [maxLength] [pageMaxLength]');
     console.log('範例：node upload-site-to-strapi.js "C:\\Users\\...\\site6"');
-    console.log('範例：node upload-site-to-strapi.js "C:\\Users\\...\\my-website"');
+    console.log('範例：node upload-site-to-strapi.js "C:\\Users\\...\\my-website" 10000 50000');
     process.exit(1);
 }
+
+// 從命令列參數或環境變數取得文字長度限制
+const MAX_LENGTH = process.argv[3] ? parseInt(process.argv[3]) : (process.env.STRAPI_MAX_LENGTH ? parseInt(process.env.STRAPI_MAX_LENGTH) : 250);
+const PAGE_MAX_LENGTH = process.argv[4] ? parseInt(process.argv[4]) : (process.env.STRAPI_PAGE_MAX_LENGTH ? parseInt(process.env.STRAPI_PAGE_MAX_LENGTH) : 10000);
+
+console.log(`📏 文字長度限制：Posts=${MAX_LENGTH} 字元，Pages=${PAGE_MAX_LENGTH} 字元`);
 
 if (!fs.existsSync(siteFolderPath)) {
     console.error(`❌ 資料夾不存在: ${siteFolderPath}`);
@@ -81,11 +87,12 @@ function extractPageHtml(rawHtml) {
     // Pages 的 HTML 也限制長度（雖然通常不會超過，但為安全起見）
     // 如果超過 10000 字元，截斷到 10000（Pages 通常可以更長）
     if (content.length > 10000) {
-        const lastP = content.lastIndexOf('</p>', 10000);
-        if (lastP > 9500) {
+        const lastP = content.lastIndexOf('</p>', PAGE_MAX_LENGTH);
+        const threshold = Math.floor(PAGE_MAX_LENGTH * 0.95);
+        if (lastP > threshold) {
             content = content.substring(0, lastP + 4);
         } else {
-            content = content.substring(0, 10000);
+            content = content.substring(0, PAGE_MAX_LENGTH);
         }
     }
     
@@ -246,7 +253,7 @@ function extractExcerpt(rawHtml) {
         text = text.replace(/<[^>]+>/g, '');
         // 清理空白
         text = text.trim().replace(/\s+/g, ' ');
-        // 限制長度為 25 字元
+        // 限制長度為 25 字元（excerpt 固定為 25 字元）
         if (text.length > 25) {
             text = text.substring(0, 25) + '...';
         }

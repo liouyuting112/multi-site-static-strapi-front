@@ -15,6 +15,11 @@
     padding: 0;
 }
 
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 body {
     font-family: var(--font-main);
     background-color: #f5f6fa;
@@ -100,6 +105,9 @@ header {
     margin-left: 280px; /* Offset for sidebar */
     padding: 2rem 4rem;
     max-width: 1200px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden; /* 防止橫向滾動 */
 }
 
 /* Hero Section */
@@ -140,6 +148,9 @@ header {
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     margin-bottom: 3rem;
+    overflow-x: hidden; /* 防止橫向滾動 */
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .daily-articles h2 {
@@ -151,18 +162,82 @@ header {
 
 .daily-article-list {
     list-style: none;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .daily-article-list li {
     border-bottom: 1px solid var(--border-color);
     padding: 1rem 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .daily-article-list li:last-child {
     border-bottom: none;
+}
+
+.daily-article-list .daily-article-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.daily-article-list .daily-article-item .daily-article-link {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.daily-article-list .daily-article-item img {
+    flex-shrink: 0;
+    width: 200px;
+    max-width: 200px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block; /* 移除圖片下方空白 */
+    box-sizing: border-box;
+}
+
+/* 響應式：小螢幕時圖片自動調整 */
+@media (max-width: 600px) {
+    .daily-article-list .daily-article-item img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
+
+.daily-article-list .daily-article-item .daily-content {
+    flex: 1;
+    min-width: 0; /* 允許內容收縮 */
+}
+
+.daily-article-list .daily-article-item h3 {
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.daily-article-list .daily-article-item .daily-snippet {
+    color: #636e72;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.daily-article-list .daily-article-item .publish-date {
+    color: #95a5a6;
+    font-size: 0.85rem;
 }
 
 .daily-article-list a {
@@ -309,9 +384,64 @@ footer {
     .main-wrapper {
         margin-left: 0;
         padding: 1rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
     }
 
     .hero {
         flex-direction: column;
+    }
+    
+    .daily-articles {
+        padding: 1rem;
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .daily-article-list {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
+    .daily-article-list li {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
+    .daily-article-list .daily-article-item {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .daily-article-list .daily-article-item .daily-article-link {
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .daily-article-list .daily-article-item img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        flex-shrink: 1;
+        box-sizing: border-box;
+    }
+    
+    .daily-article-list .daily-article-item .daily-content {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 }
