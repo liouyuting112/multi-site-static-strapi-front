@@ -6,23 +6,21 @@
 function getStrapiUrl() {
     const hostname = window.location.hostname;
     
-    // 開發環境：預覽網址（包含 git- 或隨機字串的 vercel.app）
-    // 正式環境：標準專案名稱的 vercel.app（如 multi-site-static-strapi-front.vercel.app）
-    if (hostname.includes('vercel.app')) {
-        // 如果是標準格式（專案名稱.vercel.app），使用正式環境
-        if (hostname === 'multi-site-static-strapi-front.vercel.app' || 
-            hostname.match(/^[a-z0-9-]+\.vercel\.app$/)) {
-            return 'https://effortless-whisper-83765d99df.strapiapp.com'; // 正式環境
-        }
-        // 其他格式（包含 git- 或隨機字串），使用開發環境
-        return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    console.log('🔍 檢測環境，hostname:', hostname);
+    
+    // 正式環境：只有完全匹配標準網址才使用正式環境
+    if (hostname === 'multi-site-static-strapi-front.vercel.app') {
+        console.log('✅ 使用正式環境 Strapi');
+        return 'https://effortless-whisper-83765d99df.strapiapp.com'; // 正式環境
     }
     
-    // 本地開發或其他環境，預設使用開發環境
+    // 開發環境：所有其他情況（預覽網址、本地開發等）
+    console.log('✅ 使用開發環境 Strapi');
     return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
 }
 
-const STRAPI_URL = getStrapiUrl();
+// 動態獲取 Strapi URL（不使用固定值，避免緩存問題）
+// const STRAPI_URL = getStrapiUrl(); // 已移除，改為在函數中動態獲取
 const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；否則填入 API Token
 
 // =========================================================
@@ -103,7 +101,9 @@ async function fetchPostsFromStrapi(site, category, options = {}) {
     try {
         const { daysLimit = null, featuredOnly = false, limit = 100 } = options;
         
-        let url = `${STRAPI_URL}/api/posts?filters[site][$eq]=${site}&filters[category][$eq]=${category}`;
+        // 動態獲取 Strapi URL（確保使用正確的環境）
+        const strapiUrl = getStrapiUrl();
+        let url = `${strapiUrl}/api/posts?filters[site][$eq]=${site}&filters[category][$eq]=${category}`;
         
         // 每日精選預設只抓 isFeatured=true 的文章
         if (category === 'daily' && featuredOnly) {
@@ -829,9 +829,13 @@ async function updateNavDailyLink(site) {
 
 // 立即執行，不等待 DOMContentLoaded（確保腳本已載入）
 console.log('📋 home-cms.js 腳本已載入');
-console.log('📍 STRAPI_URL:', STRAPI_URL);
+// 顯示當前環境資訊
+const currentStrapiUrl = getStrapiUrl();
+console.log('🔍 檢測環境，hostname:', window.location.hostname);
+console.log('📍 STRAPI_URL (動態):', currentStrapiUrl);
 console.log('📍 當前 URL:', window.location.href);
 console.log('📍 當前路徑:', window.location.pathname);
+console.log('✅ 所有 API 請求將使用動態 Strapi URL:', currentStrapiUrl);
 
 function initCMS() {
     // 從 script 標籤的 data-site 屬性獲取網站名稱
@@ -873,7 +877,8 @@ function initCMS() {
     }
     
     console.log(`🚀 [${site}] 開始載入 Strapi 內容...`);
-    console.log(`   目標 Strapi URL: ${STRAPI_URL}`);
+    const strapiUrl = getStrapiUrl();
+    console.log(`   目標 Strapi URL: ${strapiUrl}`);
     
     // 同時載入每日精選和固定文章
     Promise.all([

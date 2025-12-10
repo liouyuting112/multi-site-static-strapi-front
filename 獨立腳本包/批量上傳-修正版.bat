@@ -31,26 +31,71 @@ if %ERRORLEVEL% NEQ 0 (
 echo ✅ Git 已安裝
 
 :: =========================================================
-:: 步驟 1：設定 GitHub 和 Strapi
+:: 步驟 1：選擇環境並設定 GitHub 和 Strapi
 :: =========================================================
 
 echo.
 echo ========================================
-echo [1/5] 設定 GitHub 和 Strapi
+echo [1/5] 選擇環境並設定 GitHub 和 Strapi
 echo ========================================
 echo.
 
 set CONFIG_FILE=%~dp0上傳設定.txt
 
+:: 選擇環境
+echo 📍 請選擇環境：
+echo    1 - 開發環境 (Development)
+echo    2 - 測試環境 (Staging)
+echo    3 - 正式環境 (Production)
+echo.
+set /p ENV_CHOICE="請選擇 (1/2/3，預設 3): "
+if "!ENV_CHOICE!"=="" set ENV_CHOICE=3
+
+if "!ENV_CHOICE!"=="1" (
+    set ENV_NAME=DEV
+    set ENV_DISPLAY=開發環境
+) else if "!ENV_CHOICE!"=="2" (
+    set ENV_NAME=STAGING
+    set ENV_DISPLAY=測試環境
+) else (
+    set ENV_NAME=PROD
+    set ENV_DISPLAY=正式環境
+)
+
+echo.
+echo ✅ 已選擇：!ENV_DISPLAY!
+echo.
+
 if exist "!CONFIG_FILE!" (
     echo 📋 找到現有設定檔
+    :: 讀取 GitHub 設定（所有環境共用）
     for /f "tokens=2 delims==" %%a in ('findstr /C:"GITHUB_URL=" "!CONFIG_FILE!"') do set GITHUB_URL=%%a
     for /f "tokens=2 delims==" %%a in ('findstr /C:"GITHUB_BRANCH=" "!CONFIG_FILE!"') do set GITHUB_BRANCH=%%a
-    for /f "tokens=2 delims==" %%a in ('findstr /C:"STRAPI_URL=" "!CONFIG_FILE!"') do set STRAPI_URL=%%a
-    for /f "tokens=2 delims==" %%a in ('findstr /C:"STRAPI_TOKEN=" "!CONFIG_FILE!"') do set STRAPI_TOKEN=%%a
+    
+    :: 根據選擇的環境讀取 Strapi 設定
+    if "!ENV_NAME!"=="DEV" (
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"DEV_STRAPI_URL=" "!CONFIG_FILE!"') do set STRAPI_URL=%%a
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"DEV_STRAPI_TOKEN=" "!CONFIG_FILE!"') do set STRAPI_TOKEN=%%a
+    ) else if "!ENV_NAME!"=="STAGING" (
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"STAGING_STRAPI_URL=" "!CONFIG_FILE!"') do set STRAPI_URL=%%a
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"STAGING_STRAPI_TOKEN=" "!CONFIG_FILE!"') do set STRAPI_TOKEN=%%a
+    ) else (
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"PROD_STRAPI_URL=" "!CONFIG_FILE!"') do set STRAPI_URL=%%a
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"PROD_STRAPI_TOKEN=" "!CONFIG_FILE!"') do set STRAPI_TOKEN=%%a
+        :: 如果沒有找到，使用舊格式（向後兼容）
+        if "!STRAPI_URL!"=="" (
+            for /f "tokens=2 delims==" %%a in ('findstr /C:"STRAPI_URL=" "!CONFIG_FILE!"') do set STRAPI_URL=%%a
+            for /f "tokens=2 delims==" %%a in ('findstr /C:"STRAPI_TOKEN=" "!CONFIG_FILE!"') do set STRAPI_TOKEN=%%a
+        )
+    )
+    
+    if "!STRAPI_URL!"=="" (
+        echo ⚠️  找不到 !ENV_DISPLAY! 的 Strapi 設定
+        goto :setup_config
+    )
     
     echo    GitHub: !GITHUB_URL!
-    echo    Strapi: !STRAPI_URL!
+    echo    Strapi (!ENV_DISPLAY!): !STRAPI_URL!
     echo.
     set /p USE_EXISTING="是否使用現有設定？(Y/N，預設 Y): "
     if /i "!USE_EXISTING!"=="" set USE_EXISTING=Y
@@ -67,9 +112,18 @@ if exist "!CONFIG_FILE!" (
     if "!GITHUB_BRANCH!"=="" set GITHUB_BRANCH=main
     
     echo.
-    echo 📍 請設定 Strapi 後台位置
-    set /p STRAPI_URL="Strapi URL（預設：https://effortless-whisper-83765d99df.strapiapp.com）: "
-    if "!STRAPI_URL!"=="" set STRAPI_URL=https://effortless-whisper-83765d99df.strapiapp.com
+    echo 📍 請設定 !ENV_DISPLAY! 的 Strapi 後台位置
+    if "!ENV_NAME!"=="PROD" (
+        set /p STRAPI_URL="Strapi URL（預設：https://effortless-whisper-83765d99df.strapiapp.com）: "
+        if "!STRAPI_URL!"=="" set STRAPI_URL=https://effortless-whisper-83765d99df.strapiapp.com
+    ) else (
+        set /p STRAPI_URL="Strapi URL: "
+        if "!STRAPI_URL!"=="" (
+            echo ❌ Strapi URL 不能為空
+            pause
+            exit /b 1
+        )
+    )
     
     set /p STRAPI_TOKEN="Strapi API Token: "
     if "!STRAPI_TOKEN!"=="" (
@@ -78,11 +132,46 @@ if exist "!CONFIG_FILE!" (
         exit /b 1
     )
     
+    :: 讀取現有設定（如果存在）
+    if exist "!CONFIG_FILE!" (
+        :: 保留其他環境的設定
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"GITHUB_URL=" "!CONFIG_FILE!"') do set OLD_GITHUB_URL=%%a
+        for /f "tokens=2 delims==" %%a in ('findstr /C:"GITHUB_BRANCH=" "!CONFIG_FILE!"') do set OLD_GITHUB_BRANCH=%%a
+        if "!OLD_GITHUB_URL!"=="" set OLD_GITHUB_URL=!GITHUB_URL!
+        if "!OLD_GITHUB_BRANCH!"=="" set OLD_GITHUB_BRANCH=!GITHUB_BRANCH!
+    ) else (
+        set OLD_GITHUB_URL=!GITHUB_URL!
+        set OLD_GITHUB_BRANCH=!GITHUB_BRANCH!
+    )
+    
+    :: 寫入設定檔（保留所有環境設定）
     (
-        echo GITHUB_URL=!GITHUB_URL!
-        echo GITHUB_BRANCH=!GITHUB_BRANCH!
-        echo STRAPI_URL=!STRAPI_URL!
-        echo STRAPI_TOKEN=!STRAPI_TOKEN!
+        echo GITHUB_URL=!OLD_GITHUB_URL!
+        echo GITHUB_BRANCH=!OLD_GITHUB_BRANCH!
+        echo.
+        echo # 開發環境
+        echo DEV_STRAPI_URL=
+        echo DEV_STRAPI_TOKEN=
+        echo.
+        echo # 測試環境
+        echo STAGING_STRAPI_URL=
+        echo STAGING_STRAPI_TOKEN=
+        echo.
+        echo # 正式環境
+        if "!ENV_NAME!"=="DEV" (
+            echo DEV_STRAPI_URL=!STRAPI_URL!
+            echo DEV_STRAPI_TOKEN=!STRAPI_TOKEN!
+            echo PROD_STRAPI_URL=
+            echo PROD_STRAPI_TOKEN=
+        ) else if "!ENV_NAME!"=="STAGING" (
+            echo STAGING_STRAPI_URL=!STRAPI_URL!
+            echo STAGING_STRAPI_TOKEN=!STRAPI_TOKEN!
+            echo PROD_STRAPI_URL=
+            echo PROD_STRAPI_TOKEN=
+        ) else (
+            echo PROD_STRAPI_URL=!STRAPI_URL!
+            echo PROD_STRAPI_TOKEN=!STRAPI_TOKEN!
+        )
     ) > "!CONFIG_FILE!"
 )
 
