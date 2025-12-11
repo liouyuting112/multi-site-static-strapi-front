@@ -218,11 +218,19 @@ header {
 .articles-slider-wrapper {
     position: relative;
     margin-bottom: 3rem;
+    z-index: 1;
 }
 
 .articles-container {
     overflow: hidden;
     position: relative;
+    z-index: 1;
+    /* 確保不會覆蓋按鈕 */
+    pointer-events: none;
+}
+
+.articles-container > * {
+    pointer-events: auto;
 }
 
 .articles-track {
@@ -232,11 +240,11 @@ header {
 }
 
 .article-box {
+    /* 桌面版：每頁顯示3個，每個佔33.333% */
+    width: calc(33.333% - 1.33rem);
     min-width: calc(33.333% - 1.33rem);
+    max-width: calc(33.333% - 1.33rem);
     flex-shrink: 0;
-}
-
-.article-box {
     background: white;
     border-radius: 10px;
     overflow: hidden;
@@ -244,6 +252,7 @@ header {
     transition: transform 0.3s, box-shadow 0.3s;
     border: 2px solid transparent;
     margin-right: 2rem;
+    box-sizing: border-box;
 }
 
 .article-box:last-child {
@@ -718,6 +727,8 @@ footer p {
     justify-content: center;
     gap: 1rem;
     margin-top: 2rem;
+    position: relative;
+    z-index: 1001;
 }
 
 .slide-btn {
@@ -729,13 +740,17 @@ footer p {
     border-radius: 50%;
     font-size: 1.5rem;
     cursor: pointer;
-    z-index: 1000 !important;
+    z-index: 1002 !important;
     pointer-events: auto !important;
     position: relative;
     transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .slide-btn:hover {
@@ -751,7 +766,10 @@ footer p {
 
 @media (max-width: 1024px) {
     .article-box {
+        /* 平板版：每頁顯示2個，每個佔50% */
+        width: calc(50% - 1rem);
         min-width: calc(50% - 1rem);
+        max-width: calc(50% - 1rem);
     }
     
     .hero-banner {
@@ -803,7 +821,11 @@ footer p {
     }
 
     .article-box {
-        min-width: 100%;
+        /* 手機版：每頁顯示1個，每個佔100% */
+        width: calc(100% - 2rem);
+        min-width: calc(100% - 2rem);
+        max-width: calc(100% - 2rem);
+        margin: 0 auto;
     }
     
     .topics-grid {
