@@ -206,34 +206,70 @@ document.addEventListener('DOMContentLoaded', function() {
     }, false); // 使用冒泡階段，在捕獲階段之後執行
 
     // 每日文章 - 左右排列，點擊切換（awh008 - 保持點擊切換）
-    const articlesTrack = document.querySelector('.articles-track');
-    const slidePrev = document.querySelector('.slide-prev');
-    const slideNext = document.querySelector('.slide-next');
+    let articlesTrack = document.querySelector('.articles-track');
+    let slidePrev = document.querySelector('.slide-prev');
+    let slideNext = document.querySelector('.slide-next');
     
     console.log('awh008 - articlesTrack:', articlesTrack);
     console.log('awh008 - slidePrev:', slidePrev);
     console.log('awh008 - slideNext:', slideNext);
     
-    // 確保按鈕可以點擊
-    if (slidePrev) {
-        slidePrev.style.zIndex = '1000';
-        slidePrev.style.pointerEvents = 'auto';
-        slidePrev.style.cursor = 'pointer';
-    }
-    if (slideNext) {
-        slideNext.style.zIndex = '1000';
-        slideNext.style.pointerEvents = 'auto';
-        slideNext.style.cursor = 'pointer';
+    // 確保按鈕可以點擊（桌面版和響應式都要）
+    // 先檢查按鈕是否存在
+    if (!slidePrev || !slideNext) {
+        console.error('awh008 - 找不到按鈕元素:', { slidePrev, slideNext });
+        return;
     }
     
+    // 強制設置按鈕樣式，確保在所有情況下都可點擊
+    [slidePrev, slideNext].forEach((btn, index) => {
+        btn.style.zIndex = '1002';
+        btn.style.pointerEvents = 'auto';
+        btn.style.cursor = 'pointer';
+        btn.style.position = 'relative';
+        btn.style.userSelect = 'none';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('aria-label', index === 0 ? '上一張' : '下一張');
+        
+        console.log(`awh008 - ${index === 0 ? 'slidePrev' : 'slideNext'} 樣式設置完成:`, {
+            zIndex: btn.style.zIndex,
+            pointerEvents: btn.style.pointerEvents,
+            cursor: btn.style.cursor,
+            display: btn.style.display,
+            computedZIndex: window.getComputedStyle(btn).zIndex,
+            computedPointerEvents: window.getComputedStyle(btn).pointerEvents
+        });
+    });
+    
     if (articlesTrack && slidePrev && slideNext) {
-        const articles = articlesTrack.querySelectorAll('.article-box');
+        let articles = articlesTrack.querySelectorAll('.article-box');
         let currentIndex = 0;
-        const articlesPerView = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? 2 : 3;
-        const totalSlides = Math.ceil(articles.length / articlesPerView);
+        let articlesPerView = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? 2 : 3;
+        let totalSlides = Math.ceil(articles.length / articlesPerView);
+        
+        // 保存按鈕引用，以便重新初始化時使用
+        let slidePrevRef = slidePrev;
+        let slideNextRef = slideNext;
         
         function updateSlider() {
+            // ⚠️ 關鍵：每次更新時重新獲取文章元素（因為CMS可能已經更新了DOM）
+            articles = articlesTrack.querySelectorAll('.article-box');
+            
+            // 動態判斷響應式狀態
+            const isMobile = window.innerWidth <= 768;
+            const isTablet = window.innerWidth <= 1024 && window.innerWidth > 768;
+            const isDesktop = window.innerWidth > 1024;
+            
+            // 根據響應式狀態設置每頁顯示的文章數
+            articlesPerView = isMobile ? 1 : isTablet ? 2 : 3;
+            totalSlides = Math.ceil(articles.length / articlesPerView);
+            
             if (articles.length === 0) return;
+            
             // 使用wrapper寬度來計算
             const wrapper = articlesTrack.closest('.articles-slider-wrapper');
             const container = articlesTrack.parentElement; // .articles-container
@@ -243,6 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
             container.style.overflow = 'hidden';
             container.style.position = 'relative';
             container.style.width = '100%';
+            container.style.display = 'flex';
+            container.style.justifyContent = 'center';
             
             // 確保track有正確的樣式
             articlesTrack.style.display = 'flex';
@@ -250,16 +288,54 @@ document.addEventListener('DOMContentLoaded', function() {
             articlesTrack.style.transition = 'transform 0.5s ease';
             articlesTrack.style.willChange = 'transform';
             
-            // 使用wrapper的寬度
+            // 獲取容器寬度
             const containerWidth = wrapper.offsetWidth || wrapper.clientWidth || container.offsetWidth || container.clientWidth;
-            console.log('awh008 - containerWidth:', containerWidth, 'currentIndex:', currentIndex, 'articles.length:', articles.length);
             
-            const translateX = -currentIndex * containerWidth;
+            // 確保 currentIndex 在有效範圍內
+            currentIndex = Math.max(0, Math.min(currentIndex, totalSlides - 1));
+            
+            // ⚠️ 關鍵：使用比例計算，確保卡片在屏幕中間
+            // 計算每個卡片應該佔據的容器寬度比例
+            const cardWidthPercent = 100 / articlesPerView; // 例如：3個卡片 = 33.333%
+            
+            // 計算當前卡片應該移動到的位置（百分比）
+            const targetPositionPercent = currentIndex * cardWidthPercent;
+            
+            // 轉換為實際的 px 值
+            const targetPositionPx = (containerWidth * targetPositionPercent) / 100;
+            
+            // 計算單個卡片的實際寬度（px）
+            const singleCardWidthPx = containerWidth / articlesPerView;
+            
+            // 計算居中偏移量：讓當前卡片在容器中間
+            // 偏移量 = (容器寬度 - 單個卡片寬度) / 2
+            const offsetToCenter = (containerWidth - singleCardWidthPx) / 2;
+            
+            // 總偏移量：先移動到目標位置，然後調整到中間
+            const translateX = -targetPositionPx + offsetToCenter;
+            
             articlesTrack.style.transform = `translateX(${translateX}px)`;
-            console.log('awh008 - translateX:', translateX, 'transform applied');
             
-            slidePrev.disabled = currentIndex === 0;
-            slideNext.disabled = currentIndex >= totalSlides - 1;
+            console.log('awh008 - 比例滑動:', {
+                containerWidth,
+                articlesPerView,
+                cardWidthPercent: `${cardWidthPercent}%`,
+                targetPositionPercent: `${targetPositionPercent}%`,
+                targetPositionPx,
+                singleCardWidthPx,
+                offsetToCenter,
+                translateX,
+                currentIndex,
+                totalSlides,
+                isMobile,
+                isTablet,
+                isDesktop
+            });
+            
+            if (slidePrevRef && slideNextRef) {
+                slidePrevRef.disabled = currentIndex === 0;
+                slideNextRef.disabled = currentIndex >= totalSlides - 1;
+            }
         }
         
         // 監聽視窗大小變化，重新計算
@@ -270,8 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const newArticlesPerView = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? 2 : 3;
                 if (newArticlesPerView !== articlesPerView) {
                     currentIndex = 0;
-                    updateSlider();
                 }
+                // 即使 articlesPerView 沒變，也要重新計算（因為容器寬度可能改變）
+                updateSlider();
             }, 250);
         });
         
@@ -289,58 +366,216 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // ⚠️ 關鍵：確保按鈕在所有情況下都可點擊
+        // 使用保存的引用
+        const btnPrev = slidePrevRef;
+        const btnNext = slideNextRef;
+        
+        // 重新設置按鈕樣式（強制設置，確保桌面版和響應式都可點擊）
+        btnPrev.style.zIndex = '1004';
+        btnPrev.style.pointerEvents = 'auto';
+        btnPrev.style.cursor = 'pointer';
+        btnPrev.style.position = 'relative';
+        btnPrev.style.display = 'flex';
+        btnPrev.style.alignItems = 'center';
+        btnPrev.style.justifyContent = 'center';
+        btnPrev.setAttribute('tabindex', '0');
+        btnPrev.setAttribute('role', 'button');
+        btnPrev.setAttribute('type', 'button');
+        
+        btnNext.style.zIndex = '1004';
+        btnNext.style.pointerEvents = 'auto';
+        btnNext.style.cursor = 'pointer';
+        btnNext.style.position = 'relative';
+        btnNext.style.display = 'flex';
+        btnNext.style.alignItems = 'center';
+        btnNext.style.justifyContent = 'center';
+        btnNext.setAttribute('tabindex', '0');
+        btnNext.setAttribute('role', 'button');
+        btnNext.setAttribute('type', 'button');
+        
+        // 確保按鈕容器也可點擊
+        const sliderControls = btnPrev.closest('.slider-controls');
+        if (sliderControls) {
+            sliderControls.style.zIndex = '1003';
+            sliderControls.style.pointerEvents = 'auto';
+            sliderControls.style.position = 'relative';
+        }
+        
         // 使用onclick確保事件綁定
-        slidePrev.onclick = function(e) {
+        btnPrev.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('awh008 prev button clicked');
+            console.log('awh008 prev button clicked (onclick)');
             prevSlide();
             return false;
         };
         
-        slideNext.onclick = function(e) {
+        btnNext.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('awh008 next button clicked');
+            console.log('awh008 next button clicked (onclick)');
             nextSlide();
             return false;
         };
         
-        // 同時使用addEventListener作為備份
-        slidePrev.addEventListener('click', function(e) {
+        // 同時使用addEventListener作為備份（使用捕獲階段）
+        btnPrev.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('awh008 prev button clicked (addEventListener)');
+            console.log('awh008 prev button clicked (addEventListener capture)');
             prevSlide();
             return false;
         }, true);
         
-        slideNext.addEventListener('click', function(e) {
+        btnNext.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('awh008 next button clicked (addEventListener)');
+            console.log('awh008 next button clicked (addEventListener capture)');
             nextSlide();
             return false;
         }, true);
+        
+        // 同時使用冒泡階段
+        btnPrev.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('awh008 prev button clicked (addEventListener bubble)');
+            prevSlide();
+            return false;
+        }, false);
+        
+        btnNext.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('awh008 next button clicked (addEventListener bubble)');
+            nextSlide();
+            return false;
+        }, false);
+        
+        // 測試按鈕是否可點擊
+        console.log('awh008 - 按鈕設置完成:', {
+            slidePrev: {
+                element: btnPrev,
+                zIndex: btnPrev.style.zIndex,
+                pointerEvents: btnPrev.style.pointerEvents,
+                cursor: btnPrev.style.cursor,
+                onclick: typeof btnPrev.onclick
+            },
+            slideNext: {
+                element: btnNext,
+                zIndex: btnNext.style.zIndex,
+                pointerEvents: btnNext.style.pointerEvents,
+                cursor: btnNext.style.cursor,
+                onclick: typeof btnNext.onclick
+            }
+        });
         
         // 延遲初始化，確保元素完全渲染
         setTimeout(() => {
             updateSlider();
         }, 100);
         
-        // 監聽CMS內容更新事件，重新初始化
-        document.addEventListener('cmsContentUpdated', () => {
-            setTimeout(() => {
-                const newArticles = articlesTrack.querySelectorAll('.article-box');
-                if (newArticles.length > 0 && newArticles.length !== articles.length) {
-                    currentIndex = 0;
-                    updateSlider();
-                }
-            }, 200);
+        // 監聽CMS內容更新事件，自動重新初始化（不依賴CMS主動調用）
+        document.addEventListener('cmsContentUpdated', (e) => {
+            if (e.detail && e.detail.type === 'daily') {
+                console.log('📢 [awh008] 檢測到CMS內容更新，自動重新初始化滑動器...');
+                setTimeout(() => {
+                    // 重新獲取元素引用（因為CMS可能已經更新了DOM）
+                    const newArticlesTrack = document.querySelector('.articles-track');
+                    const newSlidePrev = document.querySelector('.slide-prev');
+                    const newSlideNext = document.querySelector('.slide-next');
+                    
+                    if (newArticlesTrack && newSlidePrev && newSlideNext) {
+                        // 更新引用
+                        articlesTrack = newArticlesTrack;
+                        slidePrevRef = newSlidePrev;
+                        slideNextRef = newSlideNext;
+                        
+                        // 重新設置按鈕樣式（強制設置，確保桌面版和響應式都可點擊）
+                        slidePrevRef.style.zIndex = '1004';
+                        slidePrevRef.style.pointerEvents = 'auto';
+                        slidePrevRef.style.cursor = 'pointer';
+                        slidePrevRef.style.position = 'relative';
+                        slidePrevRef.style.display = 'flex';
+                        slidePrevRef.style.alignItems = 'center';
+                        slidePrevRef.style.justifyContent = 'center';
+                        slidePrevRef.setAttribute('tabindex', '0');
+                        slidePrevRef.setAttribute('role', 'button');
+                        slidePrevRef.setAttribute('type', 'button');
+                        
+                        slideNextRef.style.zIndex = '1004';
+                        slideNextRef.style.pointerEvents = 'auto';
+                        slideNextRef.style.cursor = 'pointer';
+                        slideNextRef.style.position = 'relative';
+                        slideNextRef.style.display = 'flex';
+                        slideNextRef.style.alignItems = 'center';
+                        slideNextRef.style.justifyContent = 'center';
+                        slideNextRef.setAttribute('tabindex', '0');
+                        slideNextRef.setAttribute('role', 'button');
+                        slideNextRef.setAttribute('type', 'button');
+                        
+                        // 確保按鈕容器也可點擊
+                        const sliderControlsReinit = slidePrevRef.closest('.slider-controls');
+                        if (sliderControlsReinit) {
+                            sliderControlsReinit.style.zIndex = '1003';
+                            sliderControlsReinit.style.pointerEvents = 'auto';
+                            sliderControlsReinit.style.position = 'relative';
+                        }
+                        
+                        // 重新綁定事件
+                        slidePrevRef.onclick = function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            console.log('awh008 prev button clicked (reinit)');
+                            prevSlide();
+                            return false;
+                        };
+                        
+                        slideNextRef.onclick = function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            console.log('awh008 next button clicked (reinit)');
+                            nextSlide();
+                            return false;
+                        };
+                        
+                        // 重新綁定 addEventListener
+                        slidePrevRef.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            console.log('awh008 prev button clicked (addEventListener reinit)');
+                            prevSlide();
+                            return false;
+                        }, true);
+                        
+                        slideNextRef.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            console.log('awh008 next button clicked (addEventListener reinit)');
+                            nextSlide();
+                            return false;
+                        }, true);
+                        
+                        // 重置索引並更新滑動器
+                        currentIndex = 0;
+                        updateSlider();
+                        console.log('✅ [awh008] 滑動器自動重新初始化完成');
+                    } else {
+                        console.warn('⚠️ [awh008] 重新初始化時找不到必要的DOM元素');
+                    }
+                }, 400);
+            }
         });
     }
 });
