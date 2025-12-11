@@ -233,14 +233,35 @@ main {
     display: flex;
     transition: transform 0.5s ease;
     gap: 2rem;
+    align-items: stretch;
+}
+
+/* 桌面版：使用grid布局，2行3列對齊 */
+@media (min-width: 1025px) {
+    .daily-slider {
+        overflow: visible !important;
+    }
+    
+    .daily-slider-track {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, auto);
+        gap: 2rem;
+        transform: none !important;
+        transition: none !important;
+    }
+    
+    .daily-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin-right: 0 !important;
+    }
 }
 
 .daily-card {
     min-width: calc(33.333% - 1.33rem);
     flex-shrink: 0;
-}
-
-.daily-card {
+    width: calc(33.333% - 1.33rem);
     background: rgba(26, 26, 62, 0.6);
     border-radius: 10px;
     overflow: hidden;
@@ -289,6 +310,8 @@ main {
     border-radius: 5px;
     font-size: 0.85rem;
     font-weight: 600;
+    z-index: 10;
+    white-space: nowrap;
 }
 
 .card-content {
@@ -723,37 +746,9 @@ footer p {
 }
 
 /* 滑動按鈕樣式 */
+/* 按鈕已移除，改用觸摸滑動 */
 .slider-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(212, 175, 55, 0.8);
-    border: none;
-    color: var(--dark-navy);
-    font-size: 2.5rem;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.slider-btn:hover {
-    background: var(--star-gold);
-    transform: translateY(-50%) scale(1.1);
-}
-
-.slider-btn-prev {
-    left: -25px;
-}
-
-.slider-btn-next {
-    right: -25px;
+    display: none !important;
 }
 
 .slider-dots {
@@ -781,26 +776,20 @@ footer p {
 /* Responsive */
 @media (max-width: 1024px) {
     .daily-card {
-        min-width: calc(50% - 1rem);
+        min-width: 100%;
+        width: 100%;
+        margin-right: 2rem;
+    }
+    
+    .daily-slider-track {
+        gap: 0;
     }
     
     .featured-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .slider-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 2rem;
-    }
-    
-    .slider-btn-prev {
-        left: -20px;
-    }
-    
-    .slider-btn-next {
-        right: -20px;
-    }
+    /* 按鈕已移除 */
 }
 
 @media (max-width: 768px) {
@@ -865,26 +854,32 @@ footer p {
     }
 
     .daily-card {
-        min-width: 100%;
+        min-width: 100% !important;
+        width: 100% !important;
+        margin-right: 2rem !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .daily-card:last-child {
+        margin-right: 0 !important;
+    }
+    
+    .daily-slider-track {
+        gap: 0 !important;
+    }
+    
+    .date-badge {
+        top: 10px;
+        right: 10px;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
     }
     
     .featured-grid {
         grid-template-columns: 1fr;
     }
     
-    .slider-btn {
-        width: 35px;
-        height: 35px;
-        font-size: 1.8rem;
-    }
-    
-    .slider-btn-prev {
-        left: 10px;
-    }
-    
-    .slider-btn-next {
-        right: 10px;
-    }
+    /* 按鈕已移除 */
 
     .content-wrapper {
         padding: 1rem;

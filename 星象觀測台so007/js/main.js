@@ -147,10 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 每日精選文章 - 垂直排列（so007）
+    const dailyArticles = document.querySelector('.daily-articles');
+    
+    if (dailyArticles) {
+        // 設置容器為垂直排列
+        dailyArticles.style.display = 'flex';
+        dailyArticles.style.flexDirection = 'column';
+        dailyArticles.style.gap = '2rem';
+    }
+
     // 星象研究卡片 - 橫向卷軸（可拖動，so007）
     const featuredTrack = document.querySelector('.featured-cards-track');
-    const carouselPrev = document.querySelector('.carousel-btn-prev');
-    const carouselNext = document.querySelector('.carousel-btn-next');
     
     if (featuredTrack) {
         const cards = featuredTrack.querySelectorAll('.featured-card');
@@ -207,16 +215,5 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 隱藏滾動條但保持功能
         featuredTrack.style.scrollbarWidth = 'thin';
-        
-        // 按鈕控制（可選）
-        if (carouselPrev && carouselNext) {
-            carouselPrev.addEventListener('click', () => {
-                featuredTrack.scrollBy({ left: -400, behavior: 'smooth' });
-            });
-            
-            carouselNext.addEventListener('click', () => {
-                featuredTrack.scrollBy({ left: 400, behavior: 'smooth' });
-            });
-        }
     }
 });

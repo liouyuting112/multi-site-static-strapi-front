@@ -1,5 +1,8 @@
 // 星座運勢屋 - 導覽列與下拉選單邏輯
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
+    'use strict';
+    
+    function initSlider() {
     const menuToggle = document.querySelector('.menu-toggle');
     const navMenu = document.querySelector('.nav-menu');
     const dropdowns = document.querySelectorAll('.dropdown');
@@ -224,18 +227,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const navPrev = document.querySelector('.nav-arrow-prev');
     const navNext = document.querySelector('.nav-arrow-next');
     
+    console.log('zfh009 - dailyTrack:', dailyTrack);
+    console.log('zfh009 - navPrev:', navPrev);
+    console.log('zfh009 - navNext:', navNext);
+    
+    // 確保按鈕可以點擊
+    if (navPrev) {
+        navPrev.style.zIndex = '1000';
+        navPrev.style.pointerEvents = 'auto';
+        navPrev.style.cursor = 'pointer';
+    }
+    if (navNext) {
+        navNext.style.zIndex = '1000';
+        navNext.style.pointerEvents = 'auto';
+        navNext.style.cursor = 'pointer';
+    }
+    
     if (dailyTrack && navPrev && navNext) {
         const items = dailyTrack.querySelectorAll('.daily-item');
         let currentIndex = 0;
         
         function updateSlider() {
             if (items.length === 0) return;
-            // 使用容器高度來計算，確保每次切換整個視窗
+            // 使用wrapper高度來計算
+            const wrapper = dailyTrack.closest('.daily-list-wrapper');
             const container = dailyTrack.parentElement; // .daily-list
-            if (!container) return;
-            const containerHeight = container.offsetHeight || container.clientHeight;
+            if (!container || !wrapper) return;
+            
+            // 確保容器有正確的overflow設置
+            container.style.overflow = 'hidden';
+            container.style.position = 'relative';
+            container.style.height = '400px';
+            
+            // 確保track有正確的樣式
+            dailyTrack.style.display = 'flex';
+            dailyTrack.style.flexDirection = 'column';
+            dailyTrack.style.flexWrap = 'nowrap';
+            dailyTrack.style.transition = 'transform 0.5s ease';
+            dailyTrack.style.willChange = 'transform';
+            
+            // 使用container的高度（固定400px）
+            const containerHeight = container.offsetHeight || container.clientHeight || 400;
+            console.log('zfh009 - containerHeight:', containerHeight, 'currentIndex:', currentIndex, 'items.length:', items.length);
+            
             const translateY = -currentIndex * containerHeight;
             dailyTrack.style.transform = `translateY(${translateY}px)`;
+            console.log('zfh009 - translateY:', translateY, 'transform applied');
             
             navPrev.style.opacity = currentIndex === 0 ? '0.5' : '1';
             navPrev.style.pointerEvents = currentIndex === 0 ? 'none' : 'auto';
@@ -257,17 +294,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        navPrev.addEventListener('click', (e) => {
+        // 使用onclick確保事件綁定
+        navPrev.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('zfh009 prev button clicked');
             prevSlide();
-        });
+            return false;
+        };
         
-        navNext.addEventListener('click', (e) => {
+        navNext.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('zfh009 next button clicked');
             nextSlide();
-        });
+            return false;
+        };
+        
+        // 同時使用addEventListener作為備份
+        navPrev.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('zfh009 prev button clicked (addEventListener)');
+            prevSlide();
+            return false;
+        }, true);
+        
+        navNext.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('zfh009 next button clicked (addEventListener)');
+            nextSlide();
+            return false;
+        }, true);
         
         // 觸摸滑動支持
         let startY = 0;
@@ -296,6 +359,20 @@ document.addEventListener('DOMContentLoaded', () => {
             isDragging = false;
         });
         
-        updateSlider();
+        // 延遲初始化，確保元素完全渲染
+        setTimeout(() => {
+            updateSlider();
+        }, 100);
+        
+        // 監聽CMS內容更新事件，重新初始化
+        document.addEventListener('cmsContentUpdated', () => {
+            setTimeout(() => {
+                const newItems = dailyTrack.querySelectorAll('.daily-item');
+                if (newItems.length > 0 && newItems.length !== items.length) {
+                    currentIndex = 0;
+                    updateSlider();
+                }
+            }, 200);
+        });
     }
 });

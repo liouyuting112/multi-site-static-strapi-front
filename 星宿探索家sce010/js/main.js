@@ -1,5 +1,5 @@
 // 星宿探索家 - 全覆蓋導覽列邏輯
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.querySelector('.menu-toggle');
     const navOverlay = document.querySelector('.nav-overlay');
     const dropdowns = document.querySelectorAll('.dropdown');
@@ -158,6 +158,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollPrev = document.querySelector('.scroll-btn-prev');
     const scrollNext = document.querySelector('.scroll-btn-next');
     
+    console.log('sce010 - dailyTrack:', dailyTrack);
+    console.log('sce010 - scrollPrev:', scrollPrev);
+    console.log('sce010 - scrollNext:', scrollNext);
+    
+    // 確保按鈕可以點擊
+    if (scrollPrev) {
+        scrollPrev.style.zIndex = '1000';
+        scrollPrev.style.pointerEvents = 'auto';
+        scrollPrev.style.cursor = 'pointer';
+    }
+    if (scrollNext) {
+        scrollNext.style.zIndex = '1000';
+        scrollNext.style.pointerEvents = 'auto';
+        scrollNext.style.cursor = 'pointer';
+    }
+    
     if (dailyTrack) {
         const posts = dailyTrack.querySelectorAll('.daily-post');
         let currentIndex = 0;
@@ -167,12 +183,29 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function updateDailySlider() {
             if (posts.length === 0) return;
-            // 使用容器寬度來計算，確保每次切換整個視窗
+            // 使用wrapper寬度來計算
+            const wrapper = dailyTrack.closest('.daily-slider-wrapper');
             const container = dailyTrack.parentElement; // .daily-grid
-            if (!container) return;
-            const containerWidth = container.offsetWidth || container.clientWidth;
+            if (!container || !wrapper) return;
+            
+            // 確保容器有正確的樣式
+            container.style.overflow = 'hidden';
+            container.style.position = 'relative';
+            container.style.width = '100%';
+            
+            // 確保track有正確的樣式
+            dailyTrack.style.display = 'flex';
+            dailyTrack.style.flexWrap = 'nowrap';
+            dailyTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            dailyTrack.style.willChange = 'transform';
+            
+            // 使用wrapper的寬度
+            const containerWidth = wrapper.offsetWidth || wrapper.clientWidth || container.offsetWidth || container.clientWidth;
+            console.log('sce010 - containerWidth:', containerWidth, 'currentIndex:', currentIndex, 'posts.length:', posts.length);
+            
             const translateX = -currentIndex * containerWidth;
             dailyTrack.style.transform = `translateX(${translateX}px)`;
+            console.log('sce010 - translateX:', translateX, 'transform applied');
             
             if (scrollPrev && scrollNext) {
                 scrollPrev.style.opacity = currentIndex === 0 ? '0.5' : '1';
@@ -181,6 +214,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 scrollNext.style.pointerEvents = currentIndex >= totalSlides - 1 ? 'none' : 'auto';
             }
         }
+        
+        // 監聽視窗大小變化，重新計算
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const newPostsPerView = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? 2 : 3;
+                if (newPostsPerView !== postsPerView) {
+                    currentIndex = 0;
+                    updateDailySlider();
+                }
+            }, 250);
+        });
         
         function nextDailySlide() {
             if (currentIndex < totalSlides - 1) {
@@ -219,19 +265,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (scrollPrev && scrollNext) {
-            scrollPrev.addEventListener('click', (e) => {
+            // 使用onclick確保事件綁定
+            scrollPrev.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('sce010 prev button clicked');
                 prevDailySlide();
                 resetAutoSlide();
-            });
+                return false;
+            };
             
-            scrollNext.addEventListener('click', (e) => {
+            scrollNext.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('sce010 next button clicked');
                 nextDailySlide();
                 resetAutoSlide();
-            });
+                return false;
+            };
+            
+            // 同時使用addEventListener作為備份
+            scrollPrev.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('sce010 prev button clicked (addEventListener)');
+                prevDailySlide();
+                resetAutoSlide();
+                return false;
+            }, true);
+            
+            scrollNext.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('sce010 next button clicked (addEventListener)');
+                nextDailySlide();
+                resetAutoSlide();
+                return false;
+            }, true);
         }
         
         // 觸摸滑動支持
@@ -270,7 +344,23 @@ document.addEventListener('DOMContentLoaded', () => {
             dailyWrapper.addEventListener('mouseleave', startAutoSlide);
         }
         
-        updateDailySlider();
-        startAutoSlide();
+        // 延遲初始化，確保元素完全渲染
+        setTimeout(() => {
+            updateDailySlider();
+            startAutoSlide();
+        }, 100);
+        
+        // 監聽CMS內容更新事件，重新初始化
+        document.addEventListener('cmsContentUpdated', () => {
+            setTimeout(() => {
+                const newPosts = dailyTrack.querySelectorAll('.daily-post');
+                if (newPosts.length > 0 && newPosts.length !== posts.length) {
+                    currentIndex = 0;
+                    const newPostsPerView = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? 2 : 3;
+                    const newTotalSlides = Math.ceil(newPosts.length / newPostsPerView);
+                    updateDailySlider();
+                }
+            }, 200);
+        });
     }
 });

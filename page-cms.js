@@ -16,7 +16,7 @@ function getStrapiUrl() {
     
     // 開發環境：所有其他情況（預覽網址、本地開發等）
     console.log('✅ 使用開發環境 Strapi');
-    return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    return 'https://ethical-dance-ee33e4e924.strapiapp.com'; // 開發環境
 }
 
 const STRAPI_URL = getStrapiUrl();
@@ -27,18 +27,45 @@ const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；�
 // =========================================================
 
 function getSiteFromPath() {
+    // 先從 script 標籤的 data-site 屬性獲取
+    const scriptTag = document.querySelector('script[data-site]');
+    if (scriptTag) {
+        const site = scriptTag.getAttribute('data-site');
+        if (site) {
+            console.log('✅ 從 data-site 屬性獲取網站名稱:', site);
+            return site;
+        }
+    }
+    
     const path = window.location.pathname;
+    // 檢查五個星座網站
+    const zodiacMatch = path.match(/\/(cds006|so007|awh008|zfh009|sce010)\//);
+    if (zodiacMatch) {
+        console.log('✅ 從路徑提取到網站名稱:', zodiacMatch[1]);
+        return zodiacMatch[1];
+    }
+    
     const match = path.match(/\/(site\d+)\//);
     if (match) {
         return match[1];
     }
-    // 如果沒有 siteX 在路徑中，嘗試從當前目錄判斷
+    
+    // 嘗試從路徑部分判斷
     const pathParts = path.split('/');
     for (const part of pathParts) {
-        if (part.startsWith('site') && /^site\d+$/.test(part)) {
+        if ((part.startsWith('site') && /^site\d+$/.test(part)) ||
+            /^(cds006|so007|awh008|zfh009|sce010)$/.test(part)) {
             return part;
         }
     }
+    
+    // 如果還是找不到，嘗試從當前目錄名稱提取
+    const currentDir = pathParts[pathParts.length - 2];
+    if (/^(cds006|so007|awh008|zfh009|sce010)$/.test(currentDir)) {
+        console.log('✅ 從當前目錄提取到網站名稱:', currentDir);
+        return currentDir;
+    }
+    
     return 'site1'; // 預設
 }
 

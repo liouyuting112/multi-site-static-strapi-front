@@ -16,7 +16,7 @@ function getStrapiUrl() {
     
     // 開發環境：所有其他情況（預覽網址、本地開發等）
     console.log('✅ 使用開發環境 Strapi');
-    return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    return 'https://ethical-dance-ee33e4e924.strapiapp.com'; // 開發環境
 }
 
 const STRAPI_URL = getStrapiUrl();
@@ -26,11 +26,46 @@ const STRAPI_API_TOKEN = ''; // 如果 Public 角色有權限，可以留空；�
 // 工具函數
 // =========================================================
 function getSiteFromPath() {
+    // 先從 script 標籤的 data-site 屬性獲取
+    const scriptTag = document.querySelector('script[data-site]');
+    if (scriptTag) {
+        const site = scriptTag.getAttribute('data-site');
+        if (site) {
+            console.log('✅ 從 data-site 屬性獲取網站名稱:', site);
+            return site;
+        }
+    }
+    
     const path = window.location.pathname;
+    // 檢查五個星座網站
+    const zodiacMatch = path.match(/\/(cds006|so007|awh008|zfh009|sce010)\//);
+    if (zodiacMatch) {
+        console.log('✅ 從路徑提取到網站名稱:', zodiacMatch[1]);
+        return zodiacMatch[1];
+    }
+    
     const match = path.match(/\/(site\d+)\//);
     if (match) {
         return match[1];
     }
+    
+    // 嘗試從路徑部分判斷
+    const pathParts = path.split('/');
+    const siteIndex = pathParts.findIndex(part => 
+        (part.startsWith('site') && /^site\d+$/.test(part)) ||
+        /^(cds006|so007|awh008|zfh009|sce010)$/.test(part)
+    );
+    if (siteIndex !== -1) {
+        return pathParts[siteIndex];
+    }
+    
+    // 如果還是找不到，嘗試從當前目錄名稱提取
+    const currentDir = pathParts[pathParts.length - 2];
+    if (/^(cds006|so007|awh008|zfh009|sce010)$/.test(currentDir)) {
+        console.log('✅ 從當前目錄提取到網站名稱:', currentDir);
+        return currentDir;
+    }
+    
     return 'site1';
 }
 
@@ -132,6 +167,37 @@ function detectSiteStructure(site, container) {
     const containerClass = container.className || '';
     
     // 根據網站名稱判斷結構類型
+    // 五個星座網站
+    if (site === 'cds006') {
+        // cds006: 檢查容器類別，如果是 daily-slider-track，使用和首頁相同的樣式
+        if (containerClass.includes('daily-slider-track') || containerClass.includes('slider-track')) {
+            return { type: 'card-grid', hasImage: true, layout: 'grid', containerTag: 'div', useSliderStyle: true };
+        }
+        // cds006: 卡片網格風格
+        return { type: 'card-grid', hasImage: true, layout: 'grid', containerTag: 'div' };
+    }
+    
+    if (site === 'so007') {
+        // so007: 文章列表風格
+        return { type: 'article-list', hasImage: true, layout: 'vertical', containerTag: 'div' };
+    }
+    
+    if (site === 'awh008') {
+        // awh008: 文章盒子風格
+        return { type: 'article-box', hasImage: true, layout: 'grid', containerTag: 'div' };
+    }
+    
+    if (site === 'zfh009') {
+        // zfh009: 每日項目風格
+        return { type: 'daily-item', hasImage: true, layout: 'vertical', containerTag: 'div' };
+    }
+    
+    if (site === 'sce010') {
+        // sce010: 每日文章風格
+        return { type: 'daily-post', hasImage: true, layout: 'grid', containerTag: 'div' };
+    }
+    
+    // 其他網站
     if (site === 'site1') {
         // site1: widget 風格，圖片在左，文字在右，垂直列表
         return { type: 'widget', hasImage: true, layout: 'vertical', containerTag: 'ul' };
@@ -214,6 +280,118 @@ function generateArticleHTML(post, structure, site, index) {
     
     // 根據結構類型生成 HTML
     switch (structure.type) {
+        case 'card-grid':
+            // cds006, site2, site9 風格：網格卡片，圖片在上，文字在下
+            if (site === 'cds006') {
+                return `
+                    <article class="daily-card">
+                        <a href="articles/${slug}.html">
+                            <div class="card-image">
+                                <img src="${imgUrl}" alt="${title}" loading="lazy">
+                                ${date ? `<span class="date-badge">${date}</span>` : ''}
+                            </div>
+                            <div class="card-content">
+                                <h3>${title}</h3>
+                                <p>${description}</p>
+                            </div>
+                        </a>
+                    </article>
+                `;
+            } else if (site === 'site9') {
+                return `
+                    <article class="daily-card">
+                        <a href="articles/${slug}.html" class="daily-card-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        </a>
+                        <div class="daily-card-content">
+                            ${date ? `<div class="daily-date">${date}</div>` : ''}
+                            <h3><a href="articles/${slug}.html" style="color: #ffffff;">${title}</a></h3>
+                            ${description ? `<p>${description}</p>` : ''}
+                        </div>
+                    </article>
+                `;
+            } else {
+                // site2 風格：網格卡片
+                return `
+                    <li>
+                        <a href="articles/${slug}.html">
+                            <img src="${imgUrl}" class="daily-card-img" alt="${title}" loading="lazy">
+                            <div class="daily-card-content">
+                                <h3>${title}</h3>
+                                <p>${description}</p>
+                                ${date ? `<span class="publish-date">${date}</span>` : ''}
+                            </div>
+                        </a>
+                    </li>
+                `;
+            }
+        
+        case 'article-list':
+            // so007 風格：文章列表
+            return `
+                <article class="daily-article">
+                    <a href="articles/${slug}.html">
+                        <div class="article-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                            ${date ? `<span class="date-label">${date}</span>` : ''}
+                        </div>
+                        <div class="article-info">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        
+        case 'article-box':
+            // awh008 風格：文章盒子
+            return `
+                <article class="article-box">
+                    <a href="articles/${slug}.html">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        <div class="article-text">
+                            ${date ? `<span class="date">${date}</span>` : ''}
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        
+        case 'daily-item':
+            // zfh009 風格：每日項目
+            return `
+                <article class="daily-item">
+                    <a href="articles/${slug}.html">
+                        <div class="item-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        </div>
+                        <div class="item-content">
+                            ${date ? `<span class="item-date">${date}</span>` : ''}
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        
+        case 'daily-post':
+            // sce010 風格：每日文章
+            return `
+                <article class="daily-post">
+                    <a href="articles/${slug}.html">
+                        <div class="post-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                            ${date ? `<span class="post-date">${date}</span>` : ''}
+                        </div>
+                        <div class="post-text">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        
         case 'widget':
             // site1 風格：垂直列表，圖片在上，文字在下
             return `
@@ -361,8 +539,10 @@ async function loadAllDailyArticles() {
     const site = getSiteFromPath();
     console.log(`🚀 [${site}] 開始載入所有每日文章...`);
     
-    // 自動尋找文章列表容器
+    // 自動尋找文章列表容器（優先尋找和首頁相同的容器）
     const selectors = [
+        '.daily-slider-track',  // cds006 等網站的首頁容器
+        '.articles-grid',        // 通用網格容器
         '.all-daily-list',
         '.all-daily-articles-list',
         '.daily-list',
@@ -370,7 +550,8 @@ async function loadAllDailyArticles() {
         '.article-list',
         'ul[class*="daily"]',
         'ul[class*="article"]',
-        'div[class*="daily"]'
+        'div[class*="daily"]',
+        'div[class*="article"]'
     ];
     
     let container = null;
@@ -437,33 +618,169 @@ async function loadAllDailyArticles() {
         return new Date(dateB).getTime() - new Date(dateA).getTime();
     });
     
-    // 清空容器
+    // 清空容器（移除所有現有內容，包括靜態文章）
     container.innerHTML = '';
     
-    // 根據結構類型決定容器標籤
-    if (structure.containerTag === 'ul' && container.tagName !== 'UL') {
-        // 如果應該是 <ul> 但容器是 <div>，需要轉換
-        const ul = document.createElement('ul');
-        ul.className = container.className;
-        container.parentNode.replaceChild(ul, container);
-        container = ul;
-    } else if (structure.containerTag === 'div' && container.tagName !== 'DIV') {
-        // 如果應該是 <div> 但容器是 <ul>，需要轉換
-        const div = document.createElement('div');
-        div.className = container.className;
-        container.parentNode.replaceChild(div, container);
-        container = div;
-    }
+    // 獲取容器類別
+    const containerClass = container.className || '';
     
-    // 生成 HTML
-    uniquePosts.forEach((post, index) => {
-        const html = generateArticleHTML(post, structure, site, index);
-        if (html) {
-            container.insertAdjacentHTML('beforeend', html);
+    // 對於 all-daily-articles 頁面，應該使用響應式垂直列表布局
+    // 檢查是否在 all-daily-articles 頁面
+    const isAllDailyArticlesPage = window.location.pathname.includes('all-daily-articles');
+    
+    if (isAllDailyArticlesPage) {
+        // 在 all-daily-articles 頁面，使用響應式垂直列表
+        // 每頁顯示 10 篇文章，超過 10 篇則顯示分頁按鈕
+        
+        const itemsPerPage = 10;
+        const totalPages = Math.ceil(uniquePosts.length / itemsPerPage);
+        let currentPage = 1;
+        
+        // 創建文章容器
+        const articlesContainer = document.createElement('div');
+        articlesContainer.className = 'articles-grid';
+        articlesContainer.style.display = 'grid';
+        articlesContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(350px, 1fr))';
+        articlesContainer.style.gap = '2rem';
+        articlesContainer.style.maxWidth = '1400px';
+        articlesContainer.style.margin = '0 auto';
+        
+        // 創建分頁容器
+        const paginationContainer = document.createElement('div');
+        paginationContainer.className = 'pagination';
+        paginationContainer.style.display = 'flex';
+        paginationContainer.style.justifyContent = 'center';
+        paginationContainer.style.alignItems = 'center';
+        paginationContainer.style.gap = '1rem';
+        paginationContainer.style.marginTop = '3rem';
+        paginationContainer.style.padding = '1rem';
+        
+        // 渲染函數
+        function renderPage(page) {
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const postsToShow = uniquePosts.slice(start, end);
+            
+            articlesContainer.innerHTML = '';
+            
+            postsToShow.forEach((post, index) => {
+                const html = generateArticleHTML(post, structure, site, start + index);
+                if (html) {
+                    articlesContainer.insertAdjacentHTML('beforeend', html);
+                }
+            });
+            
+            // 更新分頁按鈕
+            updatePaginationButtons();
         }
-    });
-    
-    console.log(`✅ [${site}] 已載入 ${uniquePosts.length} 篇文章`);
+        
+        // 更新分頁按鈕
+        function updatePaginationButtons() {
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) {
+                // 如果只有一頁或沒有文章，不顯示分頁
+                return;
+            }
+            
+            // 上一頁按鈕
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '上一頁';
+            prevButton.className = 'pagination-btn';
+            prevButton.disabled = currentPage === 1;
+            prevButton.style.padding = '0.5rem 1.5rem';
+            prevButton.style.background = currentPage === 1 ? 'rgba(212, 175, 55, 0.2)' : 'rgba(212, 175, 55, 0.3)';
+            prevButton.style.color = 'var(--star-gold)';
+            prevButton.style.border = '1px solid rgba(212, 175, 55, 0.3)';
+            prevButton.style.borderRadius = '5px';
+            prevButton.style.cursor = currentPage === 1 ? 'not-allowed' : 'pointer';
+            prevButton.style.transition = 'background 0.3s';
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPage(currentPage);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            if (currentPage > 1) {
+                prevButton.onmouseover = () => prevButton.style.background = 'rgba(212, 175, 55, 0.4)';
+                prevButton.onmouseout = () => prevButton.style.background = 'rgba(212, 175, 55, 0.3)';
+            }
+            paginationContainer.appendChild(prevButton);
+            
+            // 頁碼顯示
+            const pageInfo = document.createElement('span');
+            pageInfo.textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
+            pageInfo.style.color = 'var(--star-gold)';
+            pageInfo.style.padding = '0 1rem';
+            paginationContainer.appendChild(pageInfo);
+            
+            // 下一頁按鈕
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '下一頁';
+            nextButton.className = 'pagination-btn';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.style.padding = '0.5rem 1.5rem';
+            nextButton.style.background = currentPage === totalPages ? 'rgba(212, 175, 55, 0.2)' : 'rgba(212, 175, 55, 0.3)';
+            nextButton.style.color = 'var(--star-gold)';
+            nextButton.style.border = '1px solid rgba(212, 175, 55, 0.3)';
+            nextButton.style.borderRadius = '5px';
+            nextButton.style.cursor = currentPage === totalPages ? 'not-allowed' : 'pointer';
+            nextButton.style.transition = 'background 0.3s';
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPage(currentPage);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+            if (currentPage < totalPages) {
+                nextButton.onmouseover = () => nextButton.style.background = 'rgba(212, 175, 55, 0.4)';
+                nextButton.onmouseout = () => nextButton.style.background = 'rgba(212, 175, 55, 0.3)';
+            }
+            paginationContainer.appendChild(nextButton);
+        }
+        
+        // 將容器替換為響應式布局
+        container.parentNode.replaceChild(articlesContainer, container);
+        
+        // 添加分頁容器
+        articlesContainer.parentNode.appendChild(paginationContainer);
+        
+        // 渲染第一頁
+        renderPage(1);
+        
+        console.log(`✅ [${site}] 已載入 ${uniquePosts.length} 篇文章，共 ${totalPages} 頁`);
+    } else {
+        // 其他頁面（如首頁）保持原有邏輯
+        // 對於 cds006 的 daily-slider-track，保持容器為 div，不需要轉換
+        // 其他情況根據結構類型決定容器標籤
+        if (site !== 'cds006' || !containerClass.includes('daily-slider-track')) {
+            if (structure.containerTag === 'ul' && container.tagName !== 'UL') {
+                // 如果應該是 <ul> 但容器是 <div>，需要轉換
+                const ul = document.createElement('ul');
+                ul.className = container.className;
+                container.parentNode.replaceChild(ul, container);
+                container = ul;
+            } else if (structure.containerTag === 'div' && container.tagName !== 'DIV') {
+                // 如果應該是 <div> 但容器是 <ul>，需要轉換
+                const div = document.createElement('div');
+                div.className = container.className;
+                container.parentNode.replaceChild(div, container);
+                container = div;
+            }
+        }
+        
+        // 生成 HTML
+        uniquePosts.forEach((post, index) => {
+            const html = generateArticleHTML(post, structure, site, index);
+            if (html) {
+                container.insertAdjacentHTML('beforeend', html);
+            }
+        });
+        
+        console.log(`✅ [${site}] 已載入 ${uniquePosts.length} 篇文章`);
+    }
 }
 
 // =========================================================
