@@ -729,6 +729,9 @@ footer p {
     border-radius: 50%;
     font-size: 1.5rem;
     cursor: pointer;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+    position: relative;
     transition: all 0.3s;
     display: flex;
     align-items: center;

@@ -1,5 +1,5 @@
 // 占星智慧館 - 導覽列與下拉選單邏輯
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.querySelector('.menu-toggle');
     const navMenu = document.querySelector('.nav-menu');
     const dropdowns = document.querySelectorAll('.dropdown');
@@ -210,6 +210,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const slidePrev = document.querySelector('.slide-prev');
     const slideNext = document.querySelector('.slide-next');
     
+    console.log('awh008 - articlesTrack:', articlesTrack);
+    console.log('awh008 - slidePrev:', slidePrev);
+    console.log('awh008 - slideNext:', slideNext);
+    
+    // 確保按鈕可以點擊
+    if (slidePrev) {
+        slidePrev.style.zIndex = '1000';
+        slidePrev.style.pointerEvents = 'auto';
+        slidePrev.style.cursor = 'pointer';
+    }
+    if (slideNext) {
+        slideNext.style.zIndex = '1000';
+        slideNext.style.pointerEvents = 'auto';
+        slideNext.style.cursor = 'pointer';
+    }
+    
     if (articlesTrack && slidePrev && slideNext) {
         const articles = articlesTrack.querySelectorAll('.article-box');
         let currentIndex = 0;
@@ -218,16 +234,46 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function updateSlider() {
             if (articles.length === 0) return;
-            // 使用容器寬度來計算，確保每次切換整個視窗
+            // 使用wrapper寬度來計算
+            const wrapper = articlesTrack.closest('.articles-slider-wrapper');
             const container = articlesTrack.parentElement; // .articles-container
-            if (!container) return;
-            const containerWidth = container.offsetWidth || container.clientWidth;
+            if (!container || !wrapper) return;
+            
+            // 確保容器有正確的樣式
+            container.style.overflow = 'hidden';
+            container.style.position = 'relative';
+            container.style.width = '100%';
+            
+            // 確保track有正確的樣式
+            articlesTrack.style.display = 'flex';
+            articlesTrack.style.flexWrap = 'nowrap';
+            articlesTrack.style.transition = 'transform 0.5s ease';
+            articlesTrack.style.willChange = 'transform';
+            
+            // 使用wrapper的寬度
+            const containerWidth = wrapper.offsetWidth || wrapper.clientWidth || container.offsetWidth || container.clientWidth;
+            console.log('awh008 - containerWidth:', containerWidth, 'currentIndex:', currentIndex, 'articles.length:', articles.length);
+            
             const translateX = -currentIndex * containerWidth;
             articlesTrack.style.transform = `translateX(${translateX}px)`;
+            console.log('awh008 - translateX:', translateX, 'transform applied');
             
             slidePrev.disabled = currentIndex === 0;
             slideNext.disabled = currentIndex >= totalSlides - 1;
         }
+        
+        // 監聽視窗大小變化，重新計算
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const newArticlesPerView = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? 2 : 3;
+                if (newArticlesPerView !== articlesPerView) {
+                    currentIndex = 0;
+                    updateSlider();
+                }
+            }, 250);
+        });
         
         function nextSlide() {
             if (currentIndex < totalSlides - 1) {
@@ -243,18 +289,58 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        slidePrev.addEventListener('click', (e) => {
+        // 使用onclick確保事件綁定
+        slidePrev.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('awh008 prev button clicked');
             prevSlide();
-        });
+            return false;
+        };
         
-        slideNext.addEventListener('click', (e) => {
+        slideNext.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('awh008 next button clicked');
             nextSlide();
-        });
+            return false;
+        };
         
-        updateSlider();
+        // 同時使用addEventListener作為備份
+        slidePrev.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('awh008 prev button clicked (addEventListener)');
+            prevSlide();
+            return false;
+        }, true);
+        
+        slideNext.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('awh008 next button clicked (addEventListener)');
+            nextSlide();
+            return false;
+        }, true);
+        
+        // 延遲初始化，確保元素完全渲染
+        setTimeout(() => {
+            updateSlider();
+        }, 100);
+        
+        // 監聽CMS內容更新事件，重新初始化
+        document.addEventListener('cmsContentUpdated', () => {
+            setTimeout(() => {
+                const newArticles = articlesTrack.querySelectorAll('.article-box');
+                if (newArticles.length > 0 && newArticles.length !== articles.length) {
+                    currentIndex = 0;
+                    updateSlider();
+                }
+            }, 200);
+        });
     }
 });

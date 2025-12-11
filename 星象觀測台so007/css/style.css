@@ -395,6 +395,7 @@ header {
     overflow: hidden;
     transition: transform 0.3s, box-shadow 0.3s;
     border: 2px solid rgba(192, 197, 208, 0.2);
+    width: 100%;
 }
 
 .daily-article:hover {

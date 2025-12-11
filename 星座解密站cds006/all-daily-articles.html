@@ -37,57 +37,22 @@
         </nav>
     </header>
 
-    <main>
-        <section class="page-hero">
+    <main><section class="page-hero">
             <div class="container">
                 <h1>查看所有文章</h1>
                 <p>探索更多星座知識與占星見解</p>
             </div>
         </section>
 
+
         <section class="articles-list">
             <div class="container">
                 <div class="articles-grid">
-                    <article class="article-item">
-                        <a href="articles/2025-12-10.html">
-                            <div class="article-item-image">
-                                <img src="https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/cds006-daily20251210.webp?raw=true" alt="一對情侶的星座符號交織在一起，周圍有愛心圖案" loading="lazy">
-                            </div>
-                            <div class="article-item-content">
-                                <span class="article-item-date">2025-12-10</span>
-                                <h3>星座配對真的準嗎？從統計學角度看</h3>
-                                <p>每次看到星座配對分析，總會想這到底有多少可信度。我試著去查了一些研究資料，發現其實還挺有趣的...</p>
-                            </div>
-                        </a>
-                    </article>
-                    <article class="article-item">
-                        <a href="articles/2025-12-09.html">
-                            <div class="article-item-image">
-                                <img src="https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/cds006-daily20251209.webp?raw=true" alt="十二星座符號圍成圓圈，中心是太陽和月亮的圖案" loading="lazy">
-                            </div>
-                            <div class="article-item-content">
-                                <span class="article-item-date">2025-12-09</span>
-                                <h3>上升星座為什麼比太陽星座更準？</h3>
-                                <p>以前我只知道自己的太陽星座，後來朋友說上升星座其實更重要。查了一下才發現，原來上升星座代表的是我們給別人的第一印象...</p>
-                            </div>
-                        </a>
-                    </article>
-                    <article class="article-item">
-                        <a href="articles/2025-12-08.html">
-                            <div class="article-item-image">
-                                <img src="https://github.com/liouyuting112/static-sites-monorepo-1/blob/main/shared-assets/cds006-daily20251208.webp?raw=true" alt="水星符號在星空中閃爍，周圍環繞著其他行星符號" loading="lazy">
-                            </div>
-                            <div class="article-item-content">
-                                <span class="article-item-date">2025-12-08</span>
-                                <h3>水星逆行真的會影響溝通嗎？科學與占星的對話</h3>
-                                <p>每次聽到水星逆行，身邊總有人開始抱怨電子產品故障、溝通不順。我其實一直很好奇，這到底是心理作用還是真的有什麼科學根據...</p>
-                            </div>
-                        </a>
-                    </article>
+                    <!-- 文章列表將由 all-daily-articles-cms.js 動態載入（每頁10篇，超過10篇顯示分頁） -->
+                    <p style="text-align: center; padding: 2rem; color: #666;">載入中...</p>
                 </div>
             </div>
-        </section>
-    </main>
+        </section></main>
 
     <footer>
         <div class="container">
@@ -96,6 +61,7 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script src="../all-daily-articles-cms.js" data-site="cds006"></script>
 </body>
 </html>
 

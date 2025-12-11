@@ -16,7 +16,7 @@ function getStrapiUrl() {
     
     // 開發環境：所有其他情況（預覽網址、本地開發等）
     console.log('✅ 使用開發環境 Strapi');
-    return 'https://growing-dawn-18cd7440ad.strapiapp.com'; // 開發環境
+    return 'https://ethical-dance-ee33e4e924.strapiapp.com'; // 開發環境
 }
 
 // 動態獲取 Strapi URL（不使用固定值，避免緩存問題）
@@ -181,7 +181,12 @@ function detectContainerStructure(container) {
     const parentClass = parent ? (parent.className || '') : '';
     
     // 檢測每日精選結構
-    if (containerClass.includes('daily-article-list') || 
+    if (containerClass.includes('daily-slider-track') ||
+        containerClass.includes('daily-articles') ||
+        containerClass.includes('articles-track') ||
+        containerClass.includes('daily-list-track') ||
+        containerClass.includes('daily-track') ||
+        containerClass.includes('daily-article-list') || 
         containerClass.includes('widget-list') ||
         containerClass.includes('daily-list') ||
         containerClass.includes('daily-articles-list') ||
@@ -219,6 +224,31 @@ function detectContainerStructure(container) {
             return { type: 'daily', style: 'magazine-list', hasImage: false };
         }
         
+        // cds006: .daily-slider-track（有圖片，卡片風格）
+        if (containerClass.includes('daily-slider-track')) {
+            return { type: 'daily', style: 'slider-card', hasImage: true };
+        }
+        
+        // so007: .daily-articles（有圖片，列表風格）
+        if (containerClass.includes('daily-articles') && !containerClass.includes('daily-article-list')) {
+            return { type: 'daily', style: 'article-list', hasImage: true };
+        }
+        
+        // awh008: .articles-track（有圖片，卡片風格）
+        if (containerClass.includes('articles-track')) {
+            return { type: 'daily', style: 'article-box', hasImage: true };
+        }
+        
+        // zfh009: .daily-list-track（有圖片，上下排列）
+        if (containerClass.includes('daily-list-track')) {
+            return { type: 'daily', style: 'daily-item', hasImage: true };
+        }
+        
+        // sce010: .daily-track（有圖片，卡片風格）
+        if (containerClass.includes('daily-track') && parentClass.includes('daily-grid')) {
+            return { type: 'daily', style: 'daily-post', hasImage: true };
+        }
+        
         // site2: .daily-articles .daily-article-list（有圖片）
         if (parentClass.includes('daily-articles') && containerClass.includes('daily-article-list')) {
             // site2 一定有圖片
@@ -251,9 +281,44 @@ function detectContainerStructure(container) {
     }
     
     // 檢測固定文章結構
-    if (containerClass.includes('fixed-articles') || containerClass.includes('fixed-cards-grid') || containerClass.includes('fixed-magazine-grid') || containerClass.includes('featured') || containerClass.includes('masonry') || containerClass.includes('card-grid')) {
+    if (containerClass.includes('featured-grid') ||
+        containerClass.includes('featured-cards-track') ||
+        containerClass.includes('topics-grid') ||
+        containerClass.includes('fortune-cards') ||
+        containerClass.includes('topics-track') ||
+        containerClass.includes('fixed-articles') || 
+        containerClass.includes('fixed-cards-grid') || 
+        containerClass.includes('fixed-magazine-grid') || 
+        containerClass.includes('featured') || 
+        containerClass.includes('masonry') || 
+        containerClass.includes('card-grid')) {
         const hasGrid = containerClass.includes('grid') || containerClass.includes('masonry');
         const hasCard = containerClass.includes('card') || container.querySelector('.card, .post-entry, .article-row, .card-item, .fixed-article-card');
+        
+        // cds006: .featured-grid（特色網格）
+        if (containerClass.includes('featured-grid')) {
+            return { type: 'fixed', style: 'featured-card', hasImage: true };
+        }
+        
+        // so007: .featured-cards-track（特色卡片軌道）
+        if (containerClass.includes('featured-cards-track')) {
+            return { type: 'fixed', style: 'featured-card', hasImage: true };
+        }
+        
+        // awh008: .topics-grid（主題網格）
+        if (containerClass.includes('topics-grid')) {
+            return { type: 'fixed', style: 'topic-card', hasImage: true };
+        }
+        
+        // zfh009: .fortune-cards（運勢卡片）
+        if (containerClass.includes('fortune-cards')) {
+            return { type: 'fixed', style: 'fortune-card', hasImage: true };
+        }
+        
+        // sce010: .topics-track（主題軌道）
+        if (containerClass.includes('topics-track')) {
+            return { type: 'fixed', style: 'topic-item', hasImage: true };
+        }
         
         // site9: .fixed-cards-grid（卡片網格）
         if (containerClass.includes('fixed-cards-grid')) {
@@ -320,7 +385,85 @@ function generateArticleHTML(post, structure, site, index = 0) {
     
     // 根據結構類型生成 HTML
     if (structure.type === 'daily') {
-        if (structure.style === 'widget') {
+        if (structure.style === 'slider-card') {
+            // cds006 風格：滑動卡片
+            return `
+                <article class="daily-card">
+                    <a href="articles/${slug}.html">
+                        <div class="card-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                            ${date ? `<span class="date-badge">${date}</span>` : ''}
+                        </div>
+                        <div class="card-content">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'article-list') {
+            // so007 風格：文章列表
+            return `
+                <article class="daily-article">
+                    <a href="articles/${slug}.html">
+                        <div class="article-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                            ${date ? `<span class="date-label">${date}</span>` : ''}
+                        </div>
+                        <div class="article-info">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'article-box') {
+            // awh008 風格：文章盒子
+            return `
+                <article class="article-box">
+                    <a href="articles/${slug}.html">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        <div class="article-text">
+                            ${date ? `<span class="date">${date}</span>` : ''}
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'daily-item') {
+            // zfh009 風格：每日項目（上下排列）
+            return `
+                <article class="daily-item">
+                    <a href="articles/${slug}.html">
+                        <div class="item-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        </div>
+                        <div class="item-content">
+                            ${date ? `<span class="item-date">${date}</span>` : ''}
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'daily-post') {
+            // sce010 風格：每日文章
+            return `
+                <article class="daily-post">
+                    <a href="articles/${slug}.html">
+                        <div class="post-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                            ${date ? `<span class="post-date">${date}</span>` : ''}
+                        </div>
+                        <div class="post-text">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'widget') {
             // Widget 風格（site1）
             return `
                 <li>
@@ -448,7 +591,61 @@ function generateArticleHTML(post, structure, site, index = 0) {
         }
     } else if (structure.type === 'fixed') {
         // 固定文章結構
-        if (structure.style === 'fixed-cards-grid') {
+        if (structure.style === 'featured-card') {
+            // cds006, so007 風格：特色卡片
+            return `
+                <article class="featured-card">
+                    <a href="fixed-articles/${slug}.html">
+                        <div class="featured-image">
+                            <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        </div>
+                        <div class="featured-content">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'topic-card') {
+            // awh008 風格：主題卡片
+            return `
+                <article class="topic-card">
+                    <a href="fixed-articles/${slug}.html">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        <div class="topic-info">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'fortune-card') {
+            // zfh009 風格：運勢卡片
+            return `
+                <article class="fortune-card">
+                    <a href="fixed-articles/${slug}.html">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        <div class="card-body">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'topic-item') {
+            // sce010 風格：主題項目
+            return `
+                <article class="topic-item">
+                    <a href="fixed-articles/${slug}.html">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy">
+                        <div class="topic-details">
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        </div>
+                    </a>
+                </article>
+            `;
+        } else if (structure.style === 'fixed-cards-grid') {
             // site9 風格：固定卡片網格
             return `
                 <article class="card-item">
@@ -547,6 +744,11 @@ async function loadDailyForSite(site) {
     
     // 自動尋找每日精選容器
     const selectors = [
+        '.daily-slider-track',        // cds006, so007 (每日精選)
+        '.daily-articles',            // so007 (每日精選)
+        '.articles-track',            // awh008
+        '.daily-list-track',          // zfh009
+        '.daily-track',               // sce010
         '.daily-article-list',        // site2, site4, site6
         '.daily-widget .widget-list', // site1
         '.daily-picks .daily-grid',   // site3
@@ -636,8 +838,10 @@ async function loadDailyForSite(site) {
         return new Date(dateB).getTime() - new Date(dateA).getTime();
     });
     
-    // 只顯示前 3 篇
-    const postsToDisplay = uniquePosts.slice(0, 3);
+    // 根據網站決定顯示數量（五個星座網站顯示6篇，其他顯示3篇）
+    const isZodiacSite = /^(cds006|so007|awh008|zfh009|sce010)$/.test(site);
+    const displayCount = isZodiacSite ? 6 : 3;
+    const postsToDisplay = uniquePosts.slice(0, displayCount);
     
     // 清空容器並生成 HTML
     dailyContainer.innerHTML = '';
@@ -645,8 +849,13 @@ async function loadDailyForSite(site) {
     postsToDisplay.forEach((post, index) => {
         const html = generateArticleHTML(post, structure, site, index);
         if (html) {
-            if (structure.style === 'item') {
-                // site3 風格，直接添加 <a> 元素
+            if (structure.style === 'item' || 
+                structure.style === 'slider-card' || 
+                structure.style === 'article-list' || 
+                structure.style === 'article-box' || 
+                structure.style === 'daily-item' || 
+                structure.style === 'daily-post') {
+                // 這些風格直接添加元素，不需要包裝在<li>中
                 dailyContainer.insertAdjacentHTML('beforeend', html);
             } else {
                 // 其他風格，添加 <li> 元素
@@ -654,8 +863,137 @@ async function loadDailyForSite(site) {
             }
         }
     });
+    // ⭐ 關鍵：內容插入後，通知主動態JS重綁事件
+    if(window.reInitHomeSlider)window.reInitHomeSlider();
+    
+    // 檢查並處理「查看所有文章」連結
+    // 尋找每日精選區域的父容器
+    const dailySection = dailyContainer.closest('.daily-section, [id*="daily"], [class*="daily-section"]') || 
+                         dailyContainer.parentElement?.parentElement;
+    
+    if (dailySection) {
+        // 在整個每日精選區域內檢查是否已存在「查看所有文章」連結
+        // 包括 section-header、view-all-container、view-all-wrapper 等
+        const existingViewAllLinks = dailySection.querySelectorAll(
+            'a[href*="all-daily-articles"], a.view-all, a.view-all-link, a.view-all-btn, .view-all-container a, .view-all-wrapper a, .section-header a[href*="all-daily-articles"]'
+        );
+        
+        // 過濾掉重複的連結（同一個元素可能被多個選擇器選中）
+        const uniqueLinks = Array.from(existingViewAllLinks).filter((link, index, self) => 
+            index === self.findIndex(l => l === link)
+        );
+        
+        if (uniqueLinks.length === 0) {
+            // 如果沒有，創建一個
+            console.log(`📝 [${site}] 未找到「查看所有文章」連結，正在創建...`);
+            
+            // 根據網站結構決定插入位置和樣式
+            let viewAllContainer = null;
+            let viewAllLink = null;
+            
+            // 嘗試找到合適的容器位置（優先找 section-header）
+            const sectionHeader = dailySection.querySelector('.section-header');
+            if (sectionHeader) {
+                // 如果 section-header 中沒有連結，就在這裡添加
+                const headerLink = sectionHeader.querySelector('a[href*="all-daily-articles"]');
+                if (!headerLink) {
+                    viewAllLink = document.createElement('a');
+                    viewAllLink.href = 'all-daily-articles.html';
+                    viewAllLink.textContent = '查看所有文章';
+                    viewAllLink.className = 'view-all';
+                    sectionHeader.appendChild(viewAllLink);
+                    console.log(`✅ [${site}] 已在 section-header 創建「查看所有文章」連結`);
+                }
+            } else {
+                // 如果沒有 section-header，嘗試其他位置
+                const possibleContainers = [
+                    dailySection.querySelector('.view-all-container'),
+                    dailySection.querySelector('.view-all-wrapper'),
+                    dailySection.querySelector('.daily-slider-wrapper')?.nextElementSibling,
+                    dailyContainer.parentElement?.nextElementSibling
+                ];
+                
+                for (const container of possibleContainers) {
+                    if (container) {
+                        viewAllContainer = container;
+                        break;
+                    }
+                }
+                
+                // 如果找不到合適的容器，創建一個
+                if (!viewAllContainer) {
+                    viewAllContainer = document.createElement('div');
+                    viewAllContainer.className = 'view-all-container';
+                    
+                    // 插入到每日精選容器後面
+                    const wrapper = dailyContainer.closest('.daily-slider-wrapper, .articles-slider-wrapper, .daily-list-wrapper') || 
+                                   dailyContainer.parentElement;
+                    if (wrapper && wrapper.parentElement) {
+                        wrapper.parentElement.insertBefore(viewAllContainer, wrapper.nextSibling);
+                    } else {
+                        dailySection.appendChild(viewAllContainer);
+                    }
+                }
+                
+                // 創建連結
+                viewAllLink = document.createElement('a');
+                viewAllLink.href = 'all-daily-articles.html';
+                viewAllLink.textContent = '查看所有文章';
+                viewAllLink.className = 'view-all';
+                
+                // 根據網站套用樣式
+                if (site === 'cds006' || site === 'so007' || site === 'awh008' || site === 'zfh009' || site === 'sce010') {
+                    viewAllLink.style.cssText = 'display: inline-block; margin-top: 1.5rem; color: rgba(212, 175, 55, 0.9); text-decoration: none; font-size: 1rem; transition: color 0.3s;';
+                    viewAllLink.addEventListener('mouseenter', () => {
+                        viewAllLink.style.color = 'var(--star-gold, #d4af37)';
+                    });
+                    viewAllLink.addEventListener('mouseleave', () => {
+                        viewAllLink.style.color = 'rgba(212, 175, 55, 0.9)';
+                    });
+                }
+                
+                viewAllContainer.appendChild(viewAllLink);
+                console.log(`✅ [${site}] 已創建「查看所有文章」連結`);
+            }
+        } else {
+            // 如果已存在，確保連結正確，並且移除重複的
+            console.log(`✅ [${site}] 已找到 ${uniqueLinks.length} 個「查看所有文章」連結`);
+            
+            // 保留第一個連結，移除其他重複的
+            if (uniqueLinks.length > 1) {
+                console.log(`⚠️ [${site}] 發現 ${uniqueLinks.length} 個重複的「查看所有文章」連結，正在移除多餘的...`);
+                for (let i = 1; i < uniqueLinks.length; i++) {
+                    const link = uniqueLinks[i];
+                    const parent = link.parentElement;
+                    // 如果父元素只有這一個子元素，移除整個父元素
+                    if (parent && parent.children.length === 1 && (parent.classList.contains('view-all-container') || parent.classList.contains('view-all-wrapper'))) {
+                        parent.remove();
+                    } else {
+                        link.remove();
+                    }
+                    console.log(`🗑️ [${site}] 已移除重複的「查看所有文章」連結`);
+                }
+            }
+            
+            // 確保第一個連結正確
+            const firstLink = uniqueLinks[0];
+            if (firstLink.href && !firstLink.href.includes('all-daily-articles')) {
+                // 如果連結不正確，更新它
+                const isInArticlesDir = window.location.pathname.includes('/articles/');
+                firstLink.href = isInArticlesDir ? '../all-daily-articles.html' : 'all-daily-articles.html';
+                console.log(`🔄 [${site}] 已更新現有「查看所有文章」連結: ${firstLink.href}`);
+            } else {
+                console.log(`✅ [${site}] 已存在「查看所有文章」連結，無需創建`);
+            }
+        }
+    }
     
     console.log(`✅ [${site}] 已更新每日精選，顯示 ${postsToDisplay.length} 篇文章`);
+    
+    // 觸發內容更新事件，讓其他腳本知道內容已更新
+    document.dispatchEvent(new CustomEvent('cmsContentUpdated', { 
+        detail: { site, type: 'daily', count: postsToDisplay.length } 
+    }));
 }
 
 // =========================================================
@@ -664,6 +1002,11 @@ async function loadDailyForSite(site) {
 async function loadFixedForSite(site) {
     // 自動尋找固定文章容器
     const selectors = [
+        '.featured-grid',              // cds006
+        '.featured-cards-track',        // so007
+        '.topics-grid',                 // awh008
+        '.fortune-cards',               // zfh009
+        '.topics-track',                 // sce010
         '.fixed-cards-grid',           // site9
         '.fixed-articles-grid',        // site6
         '.fixed-articles-zone',        // site7
@@ -714,10 +1057,20 @@ async function loadFixedForSite(site) {
     if (existingItems.length === 0) {
         // 如果沒有現有元素，直接生成
         fixedContainer.innerHTML = '';
-        posts.slice(0, 3).forEach((post, index) => {
+        const isZodiacSite = /^(cds006|so007|awh008|zfh009|sce010)$/.test(site);
+        const displayCount = isZodiacSite ? 3 : 3; // 固定文章通常顯示3篇
+        posts.slice(0, displayCount).forEach((post, index) => {
             const html = generateArticleHTML(post, structure, site, index);
             if (html) {
-                fixedContainer.insertAdjacentHTML('beforeend', html);
+                // 檢查結構類型，決定如何插入
+                if (structure.style === 'featured-card' || 
+                    structure.style === 'topic-card' || 
+                    structure.style === 'fortune-card' || 
+                    structure.style === 'topic-item') {
+                    fixedContainer.insertAdjacentHTML('beforeend', html);
+                } else {
+                    fixedContainer.insertAdjacentHTML('beforeend', html);
+                }
             }
         });
     } else {
@@ -765,6 +1118,11 @@ async function loadFixedForSite(site) {
     }
     
     console.log(`✅ [${site}] 已更新固定文章`);
+    
+    // 觸發內容更新事件，讓其他腳本知道內容已更新
+    document.dispatchEvent(new CustomEvent('cmsContentUpdated', { 
+        detail: { site, type: 'fixed', count: posts.length } 
+    }));
 }
 
 // =========================================================
@@ -853,17 +1211,35 @@ function initCMS() {
         if (match) {
             site = match[1];
             console.log('✅ 從 URL 路徑提取到網站名稱:', site);
-        } else {
-            // 嘗試其他路徑格式
-            const pathParts = path.split('/').filter(p => p);
-            for (const part of pathParts) {
-                if (/^site\d+$/.test(part)) {
-                    site = part;
-                    console.log('✅ 從路徑部分提取到網站名稱:', site);
-                    break;
-                }
+    } else {
+        // 嘗試其他路徑格式
+        const pathParts = path.split('/').filter(p => p);
+        for (const part of pathParts) {
+            if (/^site\d+$/.test(part)) {
+                site = part;
+                console.log('✅ 從路徑部分提取到網站名稱:', site);
+                break;
+            }
+            // 檢查是否是五個星座網站
+            if (/^(cds006|so007|awh008|zfh009|sce010)$/.test(part)) {
+                site = part;
+                console.log('✅ 從路徑部分提取到網站名稱:', site);
+                break;
             }
         }
+        
+        // 如果還是找不到，嘗試從當前目錄名稱提取
+        if (!site) {
+            const currentDir = window.location.pathname.split('/').filter(p => p)[0];
+            if (/^(cds006|so007|awh008|zfh009|sce010)$/.test(currentDir)) {
+                site = currentDir;
+                console.log('✅ 從當前目錄提取到網站名稱:', site);
+            } else if (/^site\d+$/.test(currentDir)) {
+                site = currentDir;
+                console.log('✅ 從當前目錄提取到網站名稱:', site);
+            }
+        }
+    }
     }
     
     if (!site) {
