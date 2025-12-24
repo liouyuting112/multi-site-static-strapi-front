@@ -1,0 +1,837 @@
+/* 科普發現站 - 底部固定浮動導航，雜誌式佈局，深綠色自然風格 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+:root {
+    --discover-green: #2e7d32;
+    --discover-teal: #00695c;
+    --discover-light: #c8e6c9;
+    --discover-dark: #1b5e20;
+    --discover-bg: #f1f8e9;
+    --discover-text: #1b5e20;
+    --discover-border: #81c784;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--discover-bg);
+    color: var(--discover-text);
+    line-height: 1.7;
+    font-size: 16px;
+    padding-bottom: 80px;
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+}
+
+/* 所有圖片強制響應式 */
+img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+header {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--discover-green);
+    letter-spacing: 1px;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background: var(--discover-green);
+    transition: all 0.3s;
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.main-nav a {
+    color: var(--discover-text);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.main-nav a:hover {
+    color: var(--discover-green);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 0.5rem 0;
+    min-width: 200px;
+    list-style: none;
+    margin-top: 0;
+    z-index: 1001;
+    white-space: nowrap;
+}
+
+.dropdown.active .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    color: var(--discover-text);
+    border-bottom: none;
+    transition: all 0.3s;
+}
+
+.dropdown-menu li a:hover {
+    background: var(--discover-green);
+    color: #ffffff;
+    outline: 2px solid var(--discover-dark);
+}
+
+/* Hero Section - 雜誌風格 */
+.hero-magazine {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.hero-content {
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    color: var(--discover-green);
+    margin-bottom: 1rem;
+}
+
+.hero-content p {
+    font-size: 1.3rem;
+    color: var(--discover-text);
+    margin-bottom: 2rem;
+}
+
+.hero-content img {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(46, 125, 50, 0.3);
+}
+
+/* 雜誌式佈局 */
+.magazine-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+}
+
+.daily-magazine,
+.featured-magazine {
+    margin: 3rem 0;
+}
+
+.daily-magazine h2,
+.featured-magazine h2 {
+    font-size: 2.5rem;
+    color: var(--discover-green);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--discover-border);
+}
+
+/* 每日文章 - 卡片翻轉效果 */
+.daily-flip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+    perspective: 1000px;
+    max-width: 100%;
+}
+
+.daily-flip-grid .flip-card {
+    max-width: 60vw;
+}
+
+.flip-card {
+    background-color: transparent;
+    width: 100%;
+    height: 400px;
+    perspective: 1000px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.flip-card-front {
+    background-color: #ffffff;
+    color: black;
+}
+
+.flip-card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flip-card-front .date-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.flip-card-back {
+    background-color: var(--discover-green);
+    color: white;
+    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.flip-card-back .card-content h3 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.flip-card-back .card-content p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+}
+
+.flip-read-more {
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.flip-read-more:hover {
+    color: var(--discover-light);
+}
+
+/* 固定文章 - 垂直列表 */
+.featured-vertical-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 100%;
+}
+
+.featured-vertical-list .featured-list-item {
+    max-width: 60vw;
+}
+
+.featured-list-item {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.featured-list-item:hover {
+    transform: translateX(10px);
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+}
+
+.featured-list-item a {
+    display: flex;
+    gap: 2rem;
+    color: inherit;
+    padding: 1.5rem;
+}
+
+.list-item-image {
+    flex-shrink: 0;
+    width: 200px;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.list-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.list-item-content {
+    flex: 1;
+}
+
+.list-item-content h3 {
+    font-size: 1.5rem;
+    color: var(--discover-green);
+    margin-bottom: 1rem;
+}
+
+.list-item-content p {
+    color: var(--discover-text);
+    line-height: 1.6;
+}
+
+.magazine-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.magazine-card {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.magazine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+}
+
+.magazine-card.large {
+    grid-row: span 2;
+}
+
+.magazine-card a {
+    display: block;
+    color: inherit;
+}
+
+.magazine-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.magazine-card.large img {
+    height: 400px;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.date-badge {
+    display: inline-block;
+    background: var(--discover-green);
+    color: #ffffff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.card-content h3 {
+    font-size: 1.3rem;
+    color: var(--discover-green);
+    margin-bottom: 0.8rem;
+}
+
+.card-content p {
+    color: var(--discover-text);
+    line-height: 1.6;
+}
+
+.view-all-link {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.view-all-link a {
+    color: var(--discover-green);
+    font-weight: 500;
+    font-size: 1.1rem;
+    transition: color 0.3s;
+}
+
+.view-all-link a:hover {
+    color: var(--discover-teal);
+}
+
+/* 固定文章 */
+.magazine-featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.featured-magazine-card {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.featured-magazine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+}
+
+.featured-magazine-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* 廣告區 - 側邊欄跟隨（改為sticky避免跟隨滾動） */
+.ad-sidebar {
+    position: sticky;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 300px;
+    max-width: calc(100vw - 40px);
+    z-index: 999;
+    margin-left: auto;
+}
+
+.ad-banner {
+    display: block;
+    border: 1px solid var(--discover-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ad-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 底部固定浮動導航 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(46, 125, 50, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.bottom-nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.bottom-nav a {
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.bottom-nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.bottom-nav a:link,
+.bottom-nav a:visited {
+    color: #ffffff;
+}
+
+/* Footer */
+footer {
+    background: var(--discover-dark);
+    color: var(--discover-light);
+    padding: 2rem 0;
+    text-align: center;
+    margin-top: 4rem;
+}
+
+footer p {
+    color: var(--discover-light);
+}
+
+/* 響應式設計 */
+@media (max-width: 1024px) {
+    .daily-flip-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    .daily-flip-grid .flip-card {
+        max-width: 90vw;
+    }
+    
+    .featured-list-item a {
+        flex-direction: column;
+    }
+    
+    .featured-list-item {
+        max-width: 90vw;
+    }
+    
+    .list-item-image {
+        width: 100%;
+        height: 200px;
+    }
+    
+    .ad-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .main-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+    }
+    
+    .main-nav.active {
+        display: block;
+    }
+    
+    .main-nav ul {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .main-nav li {
+        border-bottom: 1px solid var(--discover-border);
+    }
+    
+    .main-nav a {
+        display: block;
+        padding: 1rem;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .daily-flip-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .flip-card {
+        height: 350px;
+    }
+    
+    .featured-list-item a {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .list-item-image {
+        width: 100%;
+        height: 200px;
+    }
+    
+    .bottom-nav-content {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .bottom-nav a {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* 文章頁面樣式 */
+.article-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.article-header h1 {
+    font-size: 2.5rem;
+    color: var(--discover-green);
+    margin-bottom: 1rem;
+}
+
+.article-content h2 {
+    font-size: 1.8rem;
+    color: var(--discover-green);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.article-content h3 {
+    font-size: 1.4rem;
+    color: var(--discover-teal);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* 文章列表頁面樣式 */
+.article-list-section {
+    margin-top: 2rem;
+}
+
+.article-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.article-list-item {
+    background: #ffffff;
+    border: 1px solid var(--discover-border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.article-list-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+    border-color: var(--discover-green);
+}
+
+.article-list-item a {
+    display: flex;
+    gap: 2rem;
+    color: inherit;
+    padding: 1.5rem;
+}
+
+.article-list-image {
+    flex-shrink: 0;
+    width: 300px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.article-list-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.article-list-item:hover .article-list-image img {
+    transform: scale(1.05);
+}
+
+.article-list-content {
+    flex: 1;
+}
+
+.article-list-content h3 {
+    font-size: 1.5rem;
+    color: var(--discover-green);
+    margin-bottom: 0.5rem;
+}
+
+.article-date {
+    color: var(--discover-text);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.article-list-content p:last-child {
+    color: var(--discover-text);
+    line-height: 1.6;
+}
+
+.article-meta {
+    color: var(--discover-text);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.related-articles {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 3px solid var(--discover-border);
+}
+
+.related-articles h2 {
+    font-size: 1.8rem;
+    color: var(--discover-green);
+    margin-bottom: 2rem;
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.related-card {
+    background: #ffffff;
+    border: 1px solid var(--discover-border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.related-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--discover-green);
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+}
+
+.related-card a {
+    display: block;
+    color: inherit;
+}
+
+.related-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.related-card-content {
+    padding: 1rem;
+}
+
+.related-card-content h3 {
+    font-size: 1.1rem;
+    color: var(--discover-green);
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .article-list-item a {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .article-list-image {
+        width: 100%;
+        height: 200px;
+        max-width: 100%;
+    }
+    
+    .article-list-content h3 {
+        font-size: 1.2rem;
+    }
+    
+    .article-content img,
+    .magazine-card img,
+    .featured-magazine-card img,
+    .related-card img,
+    .hero-content img {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .magazine-layout,
+    .article-container {
+        max-width: 100vw;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+}
+

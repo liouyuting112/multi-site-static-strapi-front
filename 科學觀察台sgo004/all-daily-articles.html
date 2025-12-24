@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看所有文章 | 科學觀察台</title>
+    <meta name="description" content="瀏覽科學觀察台的所有每日精選文章，探索科學觀察的樂趣。">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="canonical" href="https://multi-site-static-strapi-front.vercel.app/科學觀察台sgo004/all-daily-articles.html">
+</head>
+<body>
+    <header class="minimal-header">
+        <div class="header-minimal">
+            <div class="logo-minimal">
+                <a href="index.html">科學觀察台</a>
+            </div>
+            <button class="hamburger" aria-label="選單">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="overlay-nav">
+            <div class="overlay-content">
+                <a href="index.html">首頁</a>
+                <a href="about.html">關於我們</a>
+                <a href="#" class="has-submenu">觀察主題</a>
+                <div class="submenu">
+                    <a href="fixed-articles/observe-micro.html">微觀觀察</a>
+                    <a href="fixed-articles/observe-macro.html">宏觀觀察</a>
+                    <a href="fixed-articles/observe-phenomena.html">現象觀察</a>
+                </div>
+                <a href="articles/2025-12-08.html">每日精選文章</a>
+                <a href="contact.html">聯絡我們</a>
+                <a href="privacy.html">隱私政策</a>
+            </div>
+        </nav>
+    </header>
+
+    <main><section class="page-hero">
+            <div class="container">
+                <h1>所有每日文章</h1>
+            </div>
+        </section>
+
+
+        <section class="articles-list">
+            <div class="container">
+                <div class="articles-grid">
+                    <!-- 文章列表將由 all-daily-articles-cms.js 動態載入（每頁10篇，超過10篇顯示分頁） -->
+                    <p style="text-align: center; padding: 2rem; color: #666;">載入中...</p>
+                </div>
+            </div>
+        </section></main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 科學觀察台. 版權所有.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+
+    <script src="all-daily-articles-cms.js" data-site="sgo004"></script></body>
+</html>
+

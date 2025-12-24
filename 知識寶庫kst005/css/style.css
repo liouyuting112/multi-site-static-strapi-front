@@ -1,0 +1,863 @@
+/* 知識寶庫 - 分裂式導航，滿版背景佈局，金色知識風格 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+:root {
+    --treasure-gold: #ffa000;
+    --treasure-amber: #ff6f00;
+    --treasure-light: #ffe082;
+    --treasure-dark: #e65100;
+    --treasure-bg: #fff8e1;
+    --treasure-text: #5d4037;
+    --treasure-border: #ffb74d;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--treasure-bg);
+    color: var(--treasure-text);
+    line-height: 1.7;
+    font-size: 16px;
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+}
+
+/* 全站主要區塊最大寬度修正，並確保所有內容不超過螢幕 */
+.container, .content-full-bg, .article-container, .daily-full-bg, .featured-full-bg {
+    max-width: 100vw;
+    width: 100%;
+}
+
+/* 所有圖片強制響應式，不超過容器寬度，禁止橫向捲軸 */
+img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+/* 所有卡片圖片強制不超過螢幕寬度60%，最大高度自適應，並可因裝置回應縮小 */
+.card-image-full img,
+.featured-full-card img,
+.featured-image-full img,
+.article-list-image img,
+.related-card img,
+.article-content img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 卡片區域限制最大寬高且美化間距響應 */
+.daily-full-card, .featured-full-card, .article-list-image, .related-card {
+    max-width: 60vw;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 分裂式導航 */
+.split-header {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-split {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--treasure-border);
+}
+
+.logo-split a {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--treasure-gold);
+    letter-spacing: 1px;
+}
+
+.nav-split-right {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-split-right a {
+    color: var(--treasure-text);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-split-right a:hover {
+    color: var(--treasure-gold);
+}
+
+.nav-split-main {
+    background: var(--treasure-bg);
+    border-bottom: 2px solid var(--treasure-border);
+}
+
+.nav-split-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 20px;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-split-content a {
+    color: var(--treasure-text);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.nav-split-content a:hover {
+    background: var(--treasure-gold);
+    color: #ffffff;
+}
+
+.has-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-split {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 0.5rem 0;
+    min-width: 200px;
+    z-index: 1001;
+    white-space: nowrap;
+    margin-top: 0;
+}
+
+/* 桌面版：hover顯示 */
+.has-dropdown:hover .dropdown-split {
+    display: block;
+}
+
+/* 點擊激活狀態（所有設備） */
+.has-dropdown.active .dropdown-split {
+    display: block !important;
+    z-index: 1001;
+}
+
+@media (max-width: 768px) {
+    /* 手機版：禁用hover，只使用點擊 */
+    .has-dropdown:hover .dropdown-split {
+        display: none !important;
+    }
+    
+    .has-dropdown.active .dropdown-split {
+        display: block !important;
+    }
+}
+
+.dropdown-split a {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    color: var(--treasure-text);
+}
+
+.dropdown-split a:hover {
+    background: var(--treasure-bg);
+    color: var(--treasure-gold);
+}
+
+/* 滿版背景Hero */
+.full-bg-hero {
+    position: relative;
+    height: 80vh;
+    min-height: 600px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.hero-bg-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.7);
+}
+
+.hero-bg-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #ffffff;
+    padding: 2rem;
+    max-width: 800px;
+}
+
+.hero-bg-content h1 {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.hero-bg-content p {
+    font-size: 1.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* 內容區域 */
+.content-full-bg {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 20px;
+    background: #ffffff;
+    margin-top: -50px;
+    position: relative;
+    z-index: 3;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.daily-full-bg,
+.featured-full-bg {
+    margin: 3rem 0;
+}
+
+.section-header-full {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--treasure-gold);
+}
+
+.section-header-full h2 {
+    font-size: 2.5rem;
+    color: var(--treasure-gold);
+}
+
+.view-all-full {
+    color: var(--treasure-text);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.view-all-full:hover {
+    color: var(--treasure-gold);
+}
+
+/* 每日文章 - 垂直滑動輪播 */
+.daily-vertical-slider-container {
+    position: relative;
+    max-width: 60vw;
+    margin: 0 auto;
+    height: 500px;
+    overflow: hidden;
+}
+
+.daily-vertical-slider {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.daily-vertical-track {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+}
+
+.daily-vertical-track .daily-full-card {
+    min-height: 450px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.vertical-slider-btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 160, 0, 0.9);
+    border: 2px solid var(--treasure-gold);
+    color: #ffffff;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(255, 160, 0, 0.3);
+}
+
+.vertical-slider-btn:hover {
+    background: var(--treasure-gold);
+    transform: translateX(-50%) scale(1.1);
+}
+
+.prev-vertical-btn {
+    top: 10px;
+}
+
+.next-vertical-btn {
+    bottom: 10px;
+}
+
+.vertical-slider-dots {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.vertical-slider-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 160, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.vertical-slider-dots span.active {
+    background: var(--treasure-gold);
+    transform: scale(1.3);
+}
+
+.daily-full-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.daily-full-card {
+    background: var(--treasure-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.daily-full-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 160, 0, 0.3);
+}
+
+.daily-full-card a {
+    display: block;
+    color: inherit;
+}
+
+.card-image-full {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.card-image-full img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.daily-full-card:hover .card-image-full img {
+    transform: scale(1.1);
+}
+
+.date-full {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--treasure-gold);
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.card-content-full {
+    padding: 1.5rem;
+}
+
+.card-content-full h3 {
+    font-size: 1.3rem;
+    color: var(--treasure-gold);
+    margin-bottom: 1rem;
+}
+
+.card-content-full p {
+    color: var(--treasure-text);
+    line-height: 1.6;
+}
+
+/* 固定文章 */
+.featured-full-bg h2 {
+    font-size: 2.5rem;
+    color: var(--treasure-gold);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--treasure-gold);
+}
+
+.featured-full-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 100%;
+}
+
+.featured-full-grid .featured-full-card {
+    max-width: 60vw;
+}
+
+.featured-full-card {
+    background: var(--treasure-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.featured-full-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 160, 0, 0.3);
+}
+
+.featured-full-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.featured-content-full {
+    padding: 1.5rem;
+}
+
+.featured-content-full h3 {
+    font-size: 1.3rem;
+    color: var(--treasure-gold);
+    margin-bottom: 1rem;
+}
+
+.featured-content-full p {
+    color: var(--treasure-text);
+    line-height: 1.6;
+}
+
+/* 廣告區 - 頂部固定橫幅（改為sticky避免跟隨滾動） */
+.ad-top-fixed {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 100vw;
+    overflow: hidden;
+}
+
+.ad-banner {
+    display: inline-block;
+    max-width: 728px;
+}
+
+.ad-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Footer */
+footer {
+    background: var(--treasure-dark);
+    color: var(--treasure-light);
+    padding: 2rem 0;
+    text-align: center;
+    margin-top: 4rem;
+    overflow-x: hidden;
+}
+
+footer p {
+    color: var(--treasure-light);
+}
+
+/* 響應式設計 */
+@media (max-width: 1024px) {
+    .full-bg-hero {
+        height: 60vh;
+        min-height: 400px;
+    }
+    
+    .hero-bg-content h1 {
+        font-size: 3rem;
+    }
+    
+    .ad-top-fixed {
+        display: none;
+    }
+    .card-image-full img,
+    .featured-full-card img,
+    .featured-image-full img,
+    .article-list-image img,
+    .related-card img,
+    .article-content img {
+        max-width: 100%;
+    }
+    .daily-full-card, .featured-full-card, .article-list-image, .related-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-split {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .nav-split-content {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .full-bg-hero {
+        height: 50vh;
+        min-height: 300px;
+    }
+    
+    .hero-bg-content h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-bg-content p {
+        font-size: 1rem;
+    }
+    
+    .content-full-bg {
+        margin-top: -30px;
+        padding: 2rem 1rem;
+    }
+    
+    .daily-vertical-slider-container {
+        max-width: 90vw;
+        height: 400px;
+    }
+    
+    .daily-vertical-track .daily-full-card {
+        min-height: 350px;
+    }
+    
+    .vertical-slider-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .featured-full-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .featured-full-grid .featured-full-card {
+        max-width: 90vw;
+    }
+    
+    .daily-full-card, .featured-full-card {
+        max-width: 90vw;
+    }
+    .container, .content-full-bg, .article-container, .daily-full-bg, .featured-full-bg {
+        padding: 0 4vw;
+        box-sizing: border-box;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    .article-content img {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* 文章列表頁面樣式 */
+.article-list-section {
+    margin-top: 2rem;
+}
+
+.article-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.article-list-item {
+    background: var(--treasure-bg);
+    border: 1px solid var(--treasure-border);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.article-list-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(255, 160, 0, 0.3);
+    border-color: var(--treasure-gold);
+}
+
+.article-list-item a {
+    display: flex;
+    gap: 2rem;
+    color: inherit;
+    padding: 1.5rem;
+}
+
+.article-list-image {
+    flex-shrink: 0;
+    width: 300px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.article-list-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.article-list-item:hover .article-list-image img {
+    transform: scale(1.05);
+}
+
+.article-list-content {
+    flex: 1;
+}
+
+.article-list-content h3 {
+    font-size: 1.5rem;
+    color: var(--treasure-gold);
+    margin-bottom: 0.5rem;
+}
+
+.article-date {
+    color: var(--treasure-text);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.article-list-content p:last-child {
+    color: var(--treasure-text);
+    line-height: 1.6;
+}
+
+/* 文章頁面樣式 */
+.article-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--treasure-bg);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.article-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--treasure-gold);
+}
+
+.article-header h1 {
+    font-size: 2.5rem;
+    color: var(--treasure-gold);
+    margin-bottom: 1rem;
+}
+
+.article-meta {
+    color: var(--treasure-text);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.article-content {
+    color: var(--treasure-text);
+    line-height: 1.8;
+}
+
+.article-content h2 {
+    font-size: 1.8rem;
+    color: var(--treasure-gold);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--treasure-border);
+}
+
+.article-content h3 {
+    font-size: 1.4rem;
+    color: var(--treasure-amber);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+}
+
+.article-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    margin: 2rem 0;
+    border: 1px solid var(--treasure-border);
+}
+
+.article-content ul,
+.article-content ol {
+    margin-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.article-content li {
+    margin-bottom: 0.5rem;
+}
+
+.related-articles {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 3px solid var(--treasure-gold);
+}
+
+.related-articles h2 {
+    font-size: 1.8rem;
+    color: var(--treasure-gold);
+    margin-bottom: 2rem;
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.related-card {
+    background: var(--treasure-bg);
+    border: 1px solid var(--treasure-border);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.related-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--treasure-gold);
+    box-shadow: 0 4px 15px rgba(255, 160, 0, 0.3);
+}
+
+.related-card a {
+    display: block;
+    color: inherit;
+}
+
+.related-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.related-card-content {
+    padding: 1rem;
+}
+
+.related-card-content h3 {
+    font-size: 1.1rem;
+    color: var(--treasure-gold);
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .article-list-item a {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .article-list-image {
+        width: 100%;
+        height: 200px;
+    }
+    
+    .article-list-content h3 {
+        font-size: 1.2rem;
+    }
+}
+
+/* 補足下拉選及互動元件 hover 對比色增強，提升無障礙等級 */
+.nav-split-content a:hover, .dropdown-split a:hover, .view-all-full:hover {
+    background: #f5c13e !important;
+    color: #263238 !important;
+    outline: 2px solid #795548;
+}
+

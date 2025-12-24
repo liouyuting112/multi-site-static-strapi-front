@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聯絡我們 | 獨立微光</title>
+    <meta name="description" content="有發現什麼被埋沒的獨立遊戲神作嗎？歡迎告訴我們，或者只是來聊聊遊戲。">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="logo"><a href="index.html">獨立<span>微光</span></a></div>
+            <div class="menu-btn">
+                <div class="btn-line"></div>
+                <div class="btn-line"></div>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html" class="active">首頁</a></li>
+                <li class="has-sub">
+                    <a href="#">深度專題 ▾</a>
+                    <ul class="sub-menu">
+                        <li><a href="articles/narrative-games.html">敘事遊戲分析</a></li>
+                        <li><a href="articles/pixel-art.html">像素美學鑑賞</a></li>
+                        <li><a href="articles/steam-wishlist.html">Steam 願望單</a></li>
+                    </ul>
+                </li>
+                <li><a href="articles/2025-12-03.html">每日精選文章</a></li>
+                <li><a href="about.html">關於我們</a></li>
+                <li><a href="contact.html">聯絡我們</a></li>
+                <li><a href="privacy.html">隱私政策</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main style="max-width: 800px; margin: 4rem auto; padding: 0 2rem;">
+        <h1>聯絡我們</h1>
+        <p>我們總是渴望發現新的聲音。如果你是獨立開發者，或者發現了一款鮮為人知的好遊戲，請務必告訴我們。</p>
+        
+        <form style="margin-top: 2rem; display: grid; gap: 1.5rem;">
+            <div>
+                <label for="name" style="display: block; margin-bottom: 0.5rem;">暱稱</label>
+                <input type="text" id="name" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div>
+                <label for="email" style="display: block; margin-bottom: 0.5rem;">Email</label>
+                <input type="email" id="email" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div>
+                <label for="message" style="display: block; margin-bottom: 0.5rem;">你想說的話</label>
+                <textarea id="message" rows="5" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            </div>
+            <button type="submit" style="background: #333; color: white; padding: 1rem 2rem; border: none; border-radius: 4px; cursor: pointer; width: fit-content;">發送訊息</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 獨立視界 Indie Vision. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="../page-cms.js"></script>
+</body>
+</html>

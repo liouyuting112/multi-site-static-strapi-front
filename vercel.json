@@ -1,0 +1,25 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": true
+    }
+  },
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "framework": null,
+  "env": {
+    "STRAPI_URL": "http://localhost:1337"
+  },
+  "build": {
+    "env": {
+      "STRAPI_URL": "http://localhost:1337"
+    }
+  }
+}
+
+
+
+
+
+

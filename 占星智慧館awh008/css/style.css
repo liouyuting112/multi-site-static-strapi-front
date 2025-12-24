@@ -1,0 +1,1015 @@
+/* 占星智慧館 - 雜誌式佈局，金色古典風格 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+:root {
+    --gold: #d4af37;
+    --dark-gold: #b8941f;
+    --cream: #f5f1e8;
+    --brown: #6b5b47;
+    --dark-brown: #4a3f2e;
+    --text-dark: #2d2418;
+    --text-gray: #5a4a37; /* 提高對比度，從 #6b5b47 調整為更深的顏色 */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* 全局圖片響應式規則 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    line-height: 1.8;
+    font-size: 16px;
+    overflow-x: hidden; /* 防止橫向捲軸 */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header - 簡約頂部導覽 */
+header {
+    background: var(--dark-brown);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background: var(--gold);
+    transition: all 0.3s;
+}
+
+.nav-menu ul {
+    display: flex;
+    list-style: none;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+.nav-menu a {
+    color: var(--cream);
+    font-weight: 500;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.nav-menu a:link,
+.nav-menu a:visited {
+    color: var(--cream);
+}
+
+.nav-menu a:hover {
+    color: var(--gold);
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--brown);
+    list-style: none;
+    padding: 0.5rem 0;
+    min-width: 220px;
+    border-radius: 5px;
+    margin-top: 0.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.dropdown.active .dropdown-menu {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    color: var(--cream);
+    font-size: 0.95rem;
+}
+
+.dropdown-menu li a:hover {
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--gold);
+}
+
+/* Hero Banner - 左右分欄 */
+.hero-banner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 500px;
+    background: linear-gradient(135deg, var(--dark-brown) 0%, var(--brown) 100%);
+    overflow: hidden; /* 防止內容溢出 */
+}
+
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    color: var(--cream);
+    overflow: hidden; /* 防止文字溢出 */
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-text p {
+    font-size: 1.3rem;
+    color: var(--cream);
+    line-height: 1.8;
+}
+
+.hero-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(212, 175, 55, 0.1);
+    overflow: hidden; /* 防止圖片溢出 */
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 3px solid var(--gold);
+    object-fit: cover; /* 確保圖片比例正確 */
+}
+
+/* Daily Articles Section */
+.daily-articles-section {
+    padding: 4rem 0;
+    background: var(--cream);
+}
+
+.daily-articles-section h2 {
+    font-size: 2.5rem;
+    color: var(--dark-brown);
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.daily-articles-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: var(--gold);
+}
+
+.articles-slider-wrapper {
+    position: relative;
+    margin-bottom: 3rem;
+    z-index: 1;
+    /* 確保按鈕容器在最上層 */
+    isolation: isolate; /* 創建新的層疊上下文，但不影響子元素的z-index */
+}
+
+.articles-container {
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    /* 確保不會遮擋按鈕 */
+    margin-bottom: 0; /* 移除底部間距，讓按鈕緊貼容器 */
+}
+
+.articles-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 2rem; /* 使用gap，移除margin-right避免重複計算 */
+}
+
+.article-box {
+    /* 桌面版：每頁顯示3個，每個佔33.333% */
+    width: calc(33.333% - 1.33rem);
+    min-width: calc(33.333% - 1.33rem);
+    max-width: calc(33.333% - 1.33rem);
+    flex-shrink: 0;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 2px solid transparent;
+    margin-right: 0; /* 移除margin-right，改用gap */
+    box-sizing: border-box;
+    max-width: 100%; /* 確保不會超出容器 */
+}
+
+.article-box:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-color: var(--gold);
+}
+
+.article-box a {
+    display: block;
+}
+
+.article-box img {
+    width: 100%;
+    max-width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.article-text {
+    padding: 1.5rem;
+}
+
+.date {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--dark-brown);
+    padding: 0.3rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.article-text h3 {
+    font-size: 1.3rem;
+    color: var(--dark-brown);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.article-text p {
+    color: var(--text-gray);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    /* 確保對比度足夠，如果背景是白色，文字顏色已經足夠深 */
+}
+
+.view-all-container {
+    text-align: center;
+}
+
+.view-all-btn {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: var(--gold);
+    color: var(--dark-brown);
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.view-all-btn:hover {
+    background: var(--dark-gold);
+    transform: translateY(-2px);
+}
+
+/* Featured Topics */
+.featured-topics {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, var(--dark-brown) 0%, var(--brown) 100%);
+}
+
+.featured-topics h2 {
+    font-size: 2.5rem;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.topics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+}
+
+.topic-card {
+    background: rgba(245, 241, 232, 0.95);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    border: 3px solid transparent;
+    max-width: 100%; /* 確保不會超出容器 */
+}
+
+.topic-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
+    border-color: var(--gold);
+}
+
+.topic-card a {
+    display: block;
+}
+
+.topic-card img {
+    width: 100%;
+    max-width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.topic-info {
+    padding: 2rem;
+}
+
+.topic-info h3 {
+    font-size: 1.5rem;
+    color: var(--dark-brown);
+    margin-bottom: 1rem;
+}
+
+.topic-info p {
+    color: var(--text-gray);
+    line-height: 1.8;
+    /* 確保對比度足夠 */
+}
+
+/* Ad Section - 內容中間 */
+.ad-section {
+    padding: 3rem 0;
+    background: var(--cream);
+}
+
+.ad-middle-content {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, var(--dark-brown) 0%, var(--brown) 100%);
+    margin: 2rem 0;
+}
+
+.ad-wrapper {
+    display: block;
+    text-align: center;
+    max-width: 100%;
+}
+
+.ad-wrapper img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid var(--gold);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    object-fit: contain; /* 確保圖片完整顯示 */
+}
+
+/* Page Content Styles */
+.page-hero {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--dark-brown) 0%, var(--brown) 100%);
+}
+
+.page-hero h1 {
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-hero p {
+    font-size: 1.3rem;
+    color: var(--cream);
+}
+
+.page-content {
+    padding: 4rem 0;
+    background: var(--cream);
+}
+
+.content-block {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border: 3px solid var(--gold);
+    width: 100%; /* 確保響應式 */
+    box-sizing: border-box; /* 確保padding不會導致溢出 */
+}
+
+.content-block h2 {
+    font-size: 2rem;
+    color: var(--dark-brown);
+    margin: 2rem 0 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--gold);
+}
+
+.content-block h3 {
+    font-size: 1.5rem;
+    color: var(--dark-brown);
+    margin: 2rem 0 1rem;
+}
+
+.content-block p {
+    color: var(--text-dark);
+    line-height: 1.9;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}
+
+.content-block a {
+    color: var(--dark-gold);
+    text-decoration: underline;
+}
+
+.content-block a:hover {
+    color: var(--gold);
+}
+
+.contact-info {
+    margin-top: 2rem;
+}
+
+.contact-info h3 {
+    color: var(--dark-brown);
+    margin-top: 2rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Footer */
+footer {
+    background: var(--dark-brown);
+    padding: 2rem;
+    text-align: center;
+    border-top: 3px solid var(--gold);
+}
+
+footer p {
+    color: var(--cream);
+}
+
+/* Articles List Page */
+.articles-list {
+    padding: 4rem 0;
+    background: var(--cream);
+}
+
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%; /* 確保響應式 */
+    box-sizing: border-box;
+}
+
+.article-item {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border: 3px solid transparent;
+}
+
+.article-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
+    border-color: var(--gold);
+}
+
+.article-item a {
+    display: block;
+}
+
+.article-item-image {
+    width: 100%;
+    padding-top: 60%;
+    position: relative;
+    overflow: hidden;
+}
+
+.article-item-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.article-item-content {
+    padding: 2rem;
+}
+
+.article-item-date {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--dark-brown);
+    padding: 0.4rem 1rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.article-item-content h3 {
+    font-size: 1.3rem;
+    color: var(--dark-brown);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.article-item-content p {
+    color: var(--text-gray);
+    line-height: 1.8;
+    font-size: 1rem;
+    /* 確保對比度足夠 */
+}
+
+/* Article Page Styles */
+.article-page {
+    padding: 4rem 0;
+    background: var(--cream);
+}
+
+.article-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.article-date {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--dark-brown);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.article-header h1 {
+    font-size: 2.8rem;
+    color: var(--dark-brown);
+    margin-bottom: 2rem;
+    line-height: 1.3;
+}
+
+.article-header img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 3px solid var(--gold);
+    object-fit: cover; /* 確保圖片比例正確 */
+}
+
+.article-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border: 3px solid var(--gold);
+    width: 100%; /* 確保響應式 */
+    box-sizing: border-box; /* 確保padding不會導致溢出 */
+}
+
+.article-content p {
+    color: var(--text-dark);
+    line-height: 1.9;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}
+
+.article-content h2 {
+    font-size: 2rem;
+    color: var(--dark-brown);
+    margin: 2.5rem 0 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--gold);
+}
+
+.article-content h3 {
+    font-size: 1.5rem;
+    color: var(--dark-brown);
+    margin: 2rem 0 1rem;
+}
+
+.article-content a {
+    color: var(--dark-gold);
+    text-decoration: underline;
+}
+
+.article-content a:hover {
+    color: var(--gold);
+}
+
+.related-articles {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 3px solid var(--gold);
+}
+
+.related-articles h2 {
+    font-size: 2.2rem;
+    color: var(--dark-brown);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.related-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border: 3px solid transparent;
+}
+
+.related-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
+    border-color: var(--gold);
+}
+
+.related-card a {
+    display: block;
+}
+
+.related-card img {
+    width: 100%;
+    max-width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.related-card h3 {
+    padding: 1.5rem;
+    color: var(--dark-brown);
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.view-all-link {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.view-all-link a {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: var(--gold);
+    color: var(--dark-brown);
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.view-all-link a:hover {
+    background: var(--dark-gold);
+}
+
+/* Responsive */
+/* 滑動控制按鈕 */
+.slider-controls {
+    display: flex !important;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    position: relative !important; /* 保持相對定位，但在wrapper內 */
+    z-index: 1005 !important; /* 提高z-index，確保在所有元素之上 */
+    pointer-events: auto !important;
+    /* 確保按鈕容器可點擊 */
+    isolation: isolate; /* 創建獨立的層疊上下文 */
+    width: 100% !important;
+    /* 確保按鈕在卡片區域之外 */
+    margin-top: 2rem;
+    padding-top: 1rem;
+}
+
+.slide-btn {
+    background: var(--gold);
+    color: var(--dark-brown);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1006 !important; /* 提高z-index，確保在所有元素之上 */
+    pointer-events: auto !important;
+    position: relative !important;
+    transition: all 0.3s;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    /* 確保按鈕在所有情況下都可點擊 */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* 確保按鈕可點擊 */
+    min-width: 50px;
+    min-height: 50px;
+    flex-shrink: 0;
+    /* 確保按鈕在最上層，不被其他元素遮擋 */
+    isolation: isolate;
+}
+
+.slide-btn:hover {
+    background: var(--dark-brown);
+    color: var(--gold);
+    transform: scale(1.1);
+}
+
+.slide-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+    .article-box {
+        /* 平板版：每頁顯示2個，每個佔50% */
+        width: calc(50% - 1rem);
+        min-width: calc(50% - 1rem);
+        max-width: calc(50% - 1rem);
+    }
+    
+    .hero-banner {
+        grid-template-columns: 1fr;
+        min-height: auto; /* 讓高度自動調整 */
+    }
+
+    .hero-image {
+        order: -1;
+        padding: 1.5rem;
+    }
+
+    .hero-text {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .articles-container,
+    .topics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .content-block {
+        padding: 2.5rem 2rem;
+    }
+
+    .article-content {
+        padding: 2.5rem 2rem;
+    }
+
+    .articles-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-wrapper {
+        flex-wrap: wrap;
+        padding: 1rem;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .nav-menu {
+        width: 100%;
+        display: none;
+        margin-top: 1rem;
+    }
+
+    .nav-menu.active {
+        display: block;
+    }
+
+    .nav-menu ul {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .hero-text {
+        padding: 2rem 1.5rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2rem;
+        line-height: 1.3;
+    }
+
+    .hero-text p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .hero-image {
+        padding: 1.5rem;
+    }
+
+    .article-box {
+        /* 手機版：每頁顯示1個，每個佔100% */
+        width: calc(100% - 2rem);
+        min-width: calc(100% - 2rem);
+        max-width: calc(100% - 2rem);
+        margin: 0 auto;
+    }
+    
+    .topics-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .slide-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        min-width: 40px; /* 確保按鈕不會被壓縮 */
+    }
+
+    .ad-middle-content {
+        padding: 2rem 0;
+        margin: 1rem 0;
+    }
+
+    .content-block {
+        padding: 2rem 1.5rem;
+    }
+
+    .article-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .page-hero {
+        padding: 3rem 1.5rem;
+    }
+
+    .page-hero h1 {
+        font-size: 2rem;
+    }
+
+    .page-hero p {
+        font-size: 1.1rem;
+    }
+
+    .articles-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .related-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .container {
+        padding: 0 1rem; /* 減少移動端邊距 */
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-text {
+        padding: 1.5rem 1rem;
+    }
+
+    .hero-text h1 {
+        font-size: 1.6rem;
+        line-height: 1.2;
+    }
+
+    .hero-text p {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .hero-image {
+        padding: 1rem;
+    }
+
+    .content-block {
+        padding: 1.5rem 1rem;
+    }
+
+    .article-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .page-hero {
+        padding: 2rem 1rem;
+    }
+
+    .page-hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .page-hero p {
+        font-size: 1rem;
+    }
+
+    .article-text {
+        padding: 1rem;
+    }
+
+    .topic-info {
+        padding: 1.5rem;
+    }
+
+    .article-item-content {
+        padding: 1.5rem;
+    }
+
+    .container {
+        padding: 0 0.75rem; /* 更小的移動端邊距 */
+    }
+
+    .daily-articles-section h2 {
+        font-size: 2rem;
+    }
+
+    .featured-topics h2 {
+        font-size: 2rem;
+    }
+}
+

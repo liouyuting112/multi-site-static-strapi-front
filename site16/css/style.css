@@ -1,0 +1,505 @@
+/* ===============================
+   悠慢生活誌：主樣式
+   框架皆參照首頁圖片結構，響應式全螢幕、自動展開下拉、無明顯AI痕跡
+   =============================== */
+
+/* 基本 Reset +全站字體 */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
+  background: #fffaf6;
+  color: #313131;
+  font-size: 18px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Header/nav  固定頂部，響應式行動選單 */
+.site-header {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.98);
+  z-index: 1000;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 4px 0 rgba(70,70,70,0.04);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 16px 0 16px;
+  height: 64px;
+  position: relative;
+}
+.site-logo,
+.footer-logo {
+  font-weight: 800;
+  font-size: 1.42rem;
+  letter-spacing: 6px;
+  color: #18262b;
+  text-decoration: none;
+  transition: opacity .18s;
+}
+.site-logo:hover { opacity: 0.7; }
+.menu-toggle { 
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  margin-left: 5px;
+  display: none;
+}
+.hamburger,
+.hamburger:before,
+.hamburger:after {
+  display: block;
+  background: #40454b;
+  height: 3px;
+  width: 28px;
+  content: '';
+  border-radius: 3px;
+  position: relative;
+  transition: all .27s cubic-bezier(.77,0,.18,1);
+}
+.hamburger:before,
+.hamburger:after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+.hamburger:before { top: -8px; }
+.hamburger:after  { bottom: -8px; }
+
+/* nav主選單：一般版 */
+.main-nav {
+  margin-left: 28px;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.nav-links > li {
+  position: relative;
+  margin-left: 24px;
+}
+.nav-links a {
+  color: #222;
+  text-decoration: none;
+  font-size: 1.03em;
+  transition: color .2s, background .18s;
+  display: inline-block;
+  padding: 7px 1px;
+}
+.nav-links a:hover,
+.nav-links a:focus {
+  color: #339f67;
+  background: linear-gradient(0deg,rgba(51,159,103,0.07), rgba(255,255,255,0.2));
+}
+.dropdown-list {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 40px;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 12px 32px 0 rgba(40,40,40,0.10);
+  z-index: 1500;
+  flex-direction: column;
+  padding: 9px 0;
+}
+.dropdown:hover .dropdown-list,
+.dropdown:focus-within .dropdown-list {
+  display: flex;
+}
+.dropdown-list li {
+  margin: 0;
+  padding: 4px 22px;
+}
+.dropdown-list a {
+  white-space: nowrap;
+  width: 100%;
+  padding: 6px 0 6px 0;
+  color: #30303b;
+}
+.dropdown-list a:hover,
+.dropdown-list a:focus {
+  color: #36b765;
+  background: #f4f6f3;
+}
+
+/* 手機選單: 覆蓋版，橫滑展開 */
+@media (max-width: 900px) {
+  .main-nav {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: #fff;
+    width: 100vw;
+    min-height: 100vh;
+    box-shadow: 0 1px 9px 0 rgba(160,160,160,0.13);
+    border-radius: 0 0 15px 15px;
+    padding: 30px 0 25px 0;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .main-nav.open {
+    display: flex;
+    z-index: 2000;
+  }
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+  }
+  .nav-links > li {
+    margin: 0 0 18px 0;
+    width: 100%;
+  }
+  .dropdown-list {
+    position: static;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 3px 0 2px 16px;
+    min-width: unset;
+    border-radius: 0;
+  }
+  .dropdown-list a {
+    color: #339f67;
+    background: #f5faf5;
+    border-radius: 7px;
+    width: 100%;
+    padding-left: 10px;
+  }
+  .menu-toggle { display: inline-block; }
+  .header-inner { height: 54px; }
+}
+@media (max-width:520px) {
+  .header-inner {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 7px 7px 0 10px;
+  }
+  .site-logo, .footer-logo { font-size: 1.02rem; letter-spacing: 4px;}
+}
+
+/* hero section */
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 312px;
+  width: 100vw;
+  max-width: 100vw;
+  background: linear-gradient(90deg, #f5f8ed 60%, #fff4ea 100%);
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.hero-section img {
+  max-width: 38vw;
+  min-width: 260px;
+  height: 290px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin: 36px 42px 36px 12px;
+  box-shadow: 0 8px 30px 0 rgba(50,70,60,0.09);
+}
+.hero-content {
+  flex: 1 1 210px;
+  padding: 0 28px;
+}
+.hero-content h1 {
+  margin: 0 0 10px 0;
+  font-size: 1.86rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #274722;
+}
+.hero-content p {
+  color: #5c5b5b;
+  margin-bottom: 0;
+  margin-top: 0;
+  font-size: 1.10rem;
+  font-weight: 500;
+}
+
+/* =========================
+   每日精選文章區塊
+   ========================= */
+.daily-articles {
+  max-width: 1100px;
+  margin: 0 auto 34px auto;
+  padding: 0 16px;
+}
+.daily-articles h2 {
+  margin: 0 0 18px 0;
+  font-size: 1.25em;
+  font-weight: 700;
+  color: #265540;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.daily-all-link {
+  font-size: 0.98em;
+  color: #339f67;
+  border-bottom: 1px dashed #339f67;
+  padding-left: 6px;
+  padding-right: 4px;
+  text-decoration: none;
+}
+.daily-all-link:hover {
+  background: #f4f6f3;
+}
+.daily-article-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 32px;
+  justify-content: flex-start;
+}
+.daily-article-list li {
+  flex: 0 1 312px;
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 5px 25px 0 rgba(30,47,55,0.07);
+  overflow: hidden;
+  min-width: 262px;
+  transition: box-shadow .22s;
+  margin-bottom: 10px;
+}
+.daily-article-list li a {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  min-height: 250px;
+  transition: background .15s;
+  position: relative;
+  border-radius: 13px;
+}
+.daily-article-list li a:hover,
+.daily-article-list li a:focus {
+  background: #f3f8f6;
+  outline: 2px solid #c1eed5;
+}
+.daily-article-list img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 13px 13px 0 0;
+  margin-bottom: 0;
+  background: #deede6;
+}
+.daily-title {
+  font-size: 1.17em;
+  font-weight: bold;
+  color: #154c2d;
+  margin: 12px 0 3px 14px;
+  display: block;
+}
+.publish-date {
+  color: #8e9fa3;
+  font-size: 0.96em;
+  margin-left: 14px;
+  margin-bottom: 3px;
+  display: inline-block;
+}
+.daily-desc {
+  color: #434343;
+  font-size: 1em;
+  margin: 3px 16px 13px 16px;
+  min-height: 38px;
+  line-height: 1.48;
+  flex: 1 1 auto;
+}
+
+/* 固定主題文章區塊 */
+.fixed-articles {
+  max-width: 1100px;
+  margin: 0 auto 36px auto;
+  padding: 0 16px;
+}
+.fixed-articles h2 {
+  margin: 0 0 18px 0;
+  font-size: 1.25em;
+  color: #264555;
+  font-weight: 700;
+}
+.fixed-articles-list {
+  display: flex;
+  gap: 34px;
+  justify-content: flex-start;
+}
+.fixed-article {
+  background: #f9faf8;
+  border-radius: 15px;
+  box-shadow: 0 4px 16px 0 rgba(22,33,39,0.07);
+  overflow: hidden;
+  flex: 0 1 312px;
+  min-width: 262px;
+  max-width: 352px;
+  margin-bottom: 16px;
+  transition: box-shadow .20s;
+}
+.fixed-article a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 15px;
+}
+.fixed-article a:hover,
+.fixed-article a:focus {
+  background: #e8f2ee;
+  box-shadow: 0 8px 14px 0 rgba(20,90,60,0.07);
+}
+.fixed-article img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 15px 15px 0 0;
+  margin-bottom: 0;
+  background: #e9eedd;
+}
+.fixed-article h3 {
+  font-size: 1.10em;
+  font-weight: 700;
+  color: #274652;
+  margin: 13px 0 0 18px;
+  line-height: 1.2;
+}
+.fixed-desc {
+  color: #606162;
+  font-size: 1em;
+  margin: 9px 18px 18px 18px;
+  min-height: 39px;
+  line-height: 1.52;
+  flex: 1 1 auto;
+}
+
+/* 響應式：平板/手機，兩類文章條目疊成一欄 */
+@media (max-width: 900px) {
+  .daily-article-list,
+  .fixed-articles-list {
+    flex-direction: column;
+    gap: 19px;
+  }
+  .hero-section {
+    flex-direction: column;
+    min-height: 220px;
+    align-items: flex-start;
+    padding-bottom: 10px;
+  }
+  .hero-section img {
+    max-width: 99vw;
+    min-width: 130px;
+    width: 92vw;
+    height: 180px;
+    border-radius: 10px;
+    margin: 22px auto 14px auto;
+    box-shadow: 0 3px 18px 0 rgba(50,70,60,0.09);
+    display: block;
+  }
+  .hero-content {
+    width: 99vw;
+    padding: 8px 12px 10px 12px;
+  }
+}
+
+/* 強制調整手機圖至少完整顯示，不會擠壓或裁切 */
+@media (max-width: 600px) {
+  html, body {
+    font-size: 15.7px;
+  }
+  .daily-articles,
+  .fixed-articles,
+  .hero-content { padding: 0 2vw;}
+  .footer-cols { flex-direction: column; gap: 18px;}
+  .footer-inner { padding: 18px 10px;}
+}
+
+/* ========================== Footer ========================== */
+.site-footer {
+  background: #202720;
+  min-height: 86px;
+  color: #eee;
+  font-size: 1em;
+  padding: 0 0 0 0;
+  margin-top: 40px;
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 23px 16px 10px 16px;
+}
+.footer-cols {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  align-items: flex-start;
+}
+.footer-logo {
+  font-size: 1.09rem;
+  display: block;
+  color: #f6fff7;
+  letter-spacing: 6px;
+  text-decoration:none;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.footer-nav {
+  margin: 0; padding: 0;
+  list-style: none;
+  letter-spacing: 1px;
+}
+.footer-nav li {
+  margin-bottom: 6px;
+}
+.footer-nav a {
+  color: #dbf2e0;
+  text-decoration: none;
+  font-size: 1em;
+}
+.footer-nav a:hover { color: #48e285; }
+.footer-inner address {
+  font-style: normal;
+  line-height: 1.6;
+  color: #dbf2e0;
+  font-size: .96em;
+}
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  font-size: 0.94em;
+  color: #c3c3be;
+}
+.footer-social a {
+  margin-left: 17px;
+  color: #bfe3c7;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .18s;
+}
+.footer-social a:hover { color: #44ffcc; }
+@media (max-width: 600px) {
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 7px;}
+}

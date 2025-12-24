@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勘誤回報 | 戰略核心</title>
+    <meta name="description" content="發現攻略有誤？或者是你有更佳的戰術？歡迎提交回報。">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="index.html">攻略圖書館</a></div>
+        <!-- Standardized Hamburger -->
+        <div class="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">首頁</a></li>
+            <li class="dropdown">
+                <a href="#">百科全書 ▾</a>
+                <ul class="dropdown-menu">
+                    <li><a href="articles/open-world-map.html">地圖標記心法</a></li>
+                    <li><a href="articles/souls-like-combat.html">魂系生存法則</a></li>
+                    <li><a href="articles/100-percent-guide.html">白金強迫症</a></li>
+                </ul>
+            </li>
+            <li><a href="articles/2025-12-03.html">每日精選：補血道具的紅色秘密</a></li>
+            <li><a href="about.html">關於我們</a></li>
+            <li><a href="contact.html">聯絡我們</a></li>
+            <li><a href="privacy.html">隱私政策</a></li>
+        </ul>
+    </header>
+
+    <main class="main-wrapper">
+        <div class="content-box">
+            <h1>勘誤與建議回報</h1>
+            <p>即使經過嚴密測試，疏漏在所難免。如果您發現任何數據錯誤，請協助指正。</p>
+            
+            <form style="margin-top: 2rem; display: grid; gap: 1rem;">
+                <div>
+                    <label style="display: block;">回報類型</label>
+                    <select style="width: 100%; padding: 0.5rem;">
+                        <option>數據錯誤</option>
+                        <option>內容過時</option>
+                        <option>新戰術投稿</option>
+                        <option>網站 Bug</option>
+                    </select>
+                </div>
+                <div>
+                    <label>相關頁面 URL</label>
+                    <input type="text" style="width: 100%; padding: 0.5rem;">
+                </div>
+                <div>
+                    <label>詳細說明</label>
+                    <textarea rows="6" style="width: 100%; padding: 0.5rem;"></textarea>
+                </div>
+                <button type="submit" style="padding: 0.5rem 2rem; background: #000; color: #fff; border: none;">提交</button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+            <p>&copy; 2025 攻略圖書館 Game Library. All Rights Reserved.</p>
+        </footer>
+
+    <script src="js/main.js"></script>
+    <script src="../page-cms.js"></script>
+</body>
+</html>

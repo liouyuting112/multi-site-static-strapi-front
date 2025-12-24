@@ -1,0 +1,47 @@
+缺失圖片報告
+生成時間: 2025/12/15 下午7:30:51
+
+總共缺失 5 張圖片:
+
+圖片名稱: site16-daily3.webp
+GitHub URL: https://raw.githubusercontent.com/test100web/100-website/main/shared-assets/site16-daily3.webp
+描述: 夜裡書桌的筆記本和燈光
+使用的文件:
+  - site16\articles\2025-12-04.html
+  - site16\articles\2025-12-05.html
+  - site16\articles\2025-12-06.html
+  - site16\index.html
+
+圖片名稱: site16-fixed1.webp
+GitHub URL: https://raw.githubusercontent.com/test100web/100-website/main/shared-assets/site16-fixed1.webp
+描述: 陽台上擺著早餐和書的小桌子
+使用的文件:
+  - site16\articles\fixed-1.html
+  - site16\articles\fixed-2.html
+  - site16\articles\fixed-3.html
+  - site16\index.html
+
+圖片名稱: site9-privacy.webp
+GitHub URL: https://raw.githubusercontent.com/test100web/100-website/main/shared-assets/site9-privacy.webp
+描述: 桌面上放著文件與一支小網球拍，象徵政策與訓練的平衡
+使用的文件:
+  - site9\privacy.html
+
+圖片名稱: awh008-fixed1.webp
+GitHub URL: https://raw.githubusercontent.com/test100web/100-website/main/shared-assets/awh008-fixed1.webp
+描述: 中世紀的占星手稿，上面畫著複雜的星盤圖
+使用的文件:
+  - 占星智慧館awh008\fixed-articles\classical-astrology.html
+  - 占星智慧館awh008\fixed-articles\modern-astrology.html
+  - 占星智慧館awh008\fixed-articles\planetary-influence.html
+  - 占星智慧館awh008\index.html
+
+圖片名稱: sce010-fixed3.webp
+GitHub URL: https://raw.githubusercontent.com/test100web/100-website/main/shared-assets/sce010-fixed3.webp
+描述: 不同生活風格的場景，每個場景代表不同星座
+使用的文件:
+  - 星宿探索家sce010\fixed-articles\career-astrology.html
+  - 星宿探索家sce010\fixed-articles\friendship-stars.html
+  - 星宿探索家sce010\fixed-articles\lifestyle-zodiac.html
+  - 星宿探索家sce010\index.html
+
