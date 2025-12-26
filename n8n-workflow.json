@@ -3,22 +3,17 @@
   "nodes": [
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "hours",
-              "hoursInterval": 1
-            }
-          ]
-        },
-        "triggerAtHour": 9,
-        "triggerAtMinute": 0
+        "httpMethod": "POST",
+        "path": "generate-articles",
+        "responseMode": "responseNode",
+        "options": {}
       },
-      "id": "schedule-trigger",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [250, 300]
+      "position": [250, 300],
+      "webhookId": "generate-articles"
     },
     {
       "parameters": {
@@ -26,19 +21,19 @@
           "string": [
             {
               "name": "SITES",
-              "value": "sce010,site1,cds006"
+              "value": "={{ $json.body.sites ? ($json.body.sites.join ? $json.body.sites.join(',') : $json.body.sites) : 'all' }}"
             },
             {
               "name": "DATE",
-              "value": "={{ $now.format('YYYY-MM-DD') }}"
+              "value": "={{ $json.body.date || $now.format('YYYY-MM-DD') }}"
             },
             {
               "name": "COUNT",
-              "value": "1"
+              "value": "={{ $json.body.count || '1' }}"
             },
             {
               "name": "CATEGORY",
-              "value": "daily"
+              "value": "={{ $json.body.category || 'daily' }}"
             },
             {
               "name": "STRAPI_URL",
@@ -50,7 +45,7 @@
             },
             {
               "name": "GEMINI_API_KEY",
-              "value": "你的Gemini API Key"
+              "value": "AIzaSyDbPlZ9iOEJ-0tdf1fdTYUser4tEbjaUmw"
             },
             {
               "name": "PROMPT_FILE",
@@ -65,6 +60,10 @@
               "value": "C:\\Users\\yyutingliu\\Downloads\\AI生成網站測試\\cursor\\一個主題多個站(落地)"
             },
             {
+              "name": "GITHUB_REPO_URL",
+              "value": "https://github.com/liouyuting112/multi-site-static-strapi-front.git"
+            },
+            {
               "name": "GITHUB_AUTO_PUSH",
               "value": "true"
             }
@@ -76,67 +75,17 @@
       "name": "Set Variables",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
-      "position": [450, 300]
+      "position": [650, 300]
     },
     {
       "parameters": {
-        "command": "node",
-        "arguments": "ai-generate-articles.cjs",
-        "workingDirectory": "C:\\Users\\yyutingliu\\Downloads\\AI生成網站測試\\cursor\\一個主題多個站(落地)",
-        "environmentVariables": {
-          "values": [
-            {
-              "name": "SITES",
-              "value": "={{ $json.SITES }}"
-            },
-            {
-              "name": "DATE",
-              "value": "={{ $json.DATE }}"
-            },
-            {
-              "name": "COUNT",
-              "value": "={{ $json.COUNT }}"
-            },
-            {
-              "name": "CATEGORY",
-              "value": "={{ $json.CATEGORY }}"
-            },
-            {
-              "name": "STRAPI_URL",
-              "value": "={{ $json.STRAPI_URL }}"
-            },
-            {
-              "name": "STRAPI_TOKEN",
-              "value": "={{ $json.STRAPI_TOKEN }}"
-            },
-            {
-              "name": "GEMINI_API_KEY",
-              "value": "={{ $json.GEMINI_API_KEY }}"
-            },
-            {
-              "name": "PROMPT_FILE",
-              "value": "={{ $json.PROMPT_FILE }}"
-            },
-            {
-              "name": "OUTPUT_JSON",
-              "value": "={{ $json.OUTPUT_JSON }}"
-            },
-            {
-              "name": "GITHUB_REPO_PATH",
-              "value": "={{ $json.GITHUB_REPO_PATH }}"
-            },
-            {
-              "name": "GITHUB_AUTO_PUSH",
-              "value": "={{ $json.GITHUB_AUTO_PUSH }}"
-            }
-          ]
-        }
+        "jsCode": "const { execSync } = require('child_process');\nconst path = require('path');\n\nconst workingDir = 'C:\\\\Users\\\\yyutingliu\\\\Downloads\\\\AI生成網站測試\\\\cursor\\\\一個主題多個站(落地)';\nconst scriptPath = path.join(workingDir, 'ai-generate-articles.cjs');\n\n// 從 Set Variables 節點取得資料\nconst inputData = $input.item.json;\n\n// 處理數量（如果是範圍，隨機選擇）\nlet finalCount = inputData.COUNT;\nif (typeof finalCount === 'string' && finalCount.includes('-')) {\n  const [min, max] = finalCount.split('-').map(Number);\n  finalCount = Math.floor(Math.random() * (max - min + 1)) + min;\n  console.log(`隨機數量: ${min}-${max} → 選擇 ${finalCount}`);\n}\n\n// 設定環境變數\nconst env = {\n  ...process.env,\n  SITES: inputData.SITES,\n  DATE: inputData.DATE,\n  COUNT: finalCount.toString(),\n  CATEGORY: inputData.CATEGORY,\n  STRAPI_URL: inputData.STRAPI_URL,\n  STRAPI_TOKEN: inputData.STRAPI_TOKEN,\n  GEMINI_API_KEY: inputData.GEMINI_API_KEY,\n  PROMPT_FILE: inputData.PROMPT_FILE,\n  OUTPUT_JSON: inputData.OUTPUT_JSON,\n  GITHUB_REPO_PATH: inputData.GITHUB_REPO_PATH,\n  GITHUB_AUTO_PUSH: inputData.GITHUB_AUTO_PUSH\n};\n\ntry {\n  console.log(`執行腳本: ${scriptPath}`);\n  console.log(`參數: SITES=${inputData.SITES}, DATE=${inputData.DATE}, COUNT=${finalCount}, CATEGORY=${inputData.CATEGORY}`);\n  \n  const output = execSync(`node \"${scriptPath}\"`, {\n    cwd: workingDir,\n    env: env,\n    encoding: 'utf8',\n    maxBuffer: 10 * 1024 * 1024 // 10MB buffer\n  });\n  \n  // 嘗試從輸出中解析 JSON 結果\n  let result = {\n    exitCode: 0,\n    output: output,\n    success: true\n  };\n  \n  // 如果輸出包含 JSON，嘗試解析\n  const jsonMatch = output.match(/\\{[\\s\\S]*\"success\"[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    try {\n      const parsed = JSON.parse(jsonMatch[0]);\n      result = { ...result, ...parsed };\n    } catch (e) {\n      // JSON 解析失敗，使用原始輸出\n    }\n  }\n  \n  // 從輸出中提取統計資訊\n  const successMatch = output.match(/✅ 成功: (\\d+)/);\n  const failMatch = output.match(/❌ 失敗: (\\d+)/);\n  \n  if (successMatch) {\n    result.successCount = parseInt(successMatch[1]);\n  }\n  if (failMatch) {\n    result.failCount = parseInt(failMatch[1]);\n  }\n  \n  return {\n    json: result\n  };\n} catch (error) {\n  console.error('執行錯誤:', error);\n  return {\n    json: {\n      exitCode: error.status || 1,\n      output: error.stdout || error.message,\n      error: error.message,\n      stderr: error.stderr,\n      success: false\n    }\n  };\n}"
       },
       "id": "execute-command",
-      "name": "Execute Command",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [650, 300]
+      "name": "Generate Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
     },
     {
       "parameters": {
@@ -165,59 +114,32 @@
       "name": "IF Success",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [850, 300]
+      "position": [1050, 300]
     },
     {
       "parameters": {
-        "command": "node",
-        "arguments": "export-strapi-to-github.cjs",
-        "workingDirectory": "C:\\Users\\yyutingliu\\Downloads\\AI生成網站測試\\cursor\\一個主題多個站(落地)",
-        "environmentVariables": {
-          "values": [
-            {
-              "name": "SITES",
-              "value": "={{ $json.SITES }}"
-            },
-            {
-              "name": "DATE",
-              "value": "={{ $json.DATE }}"
-            },
-            {
-              "name": "CATEGORY",
-              "value": "={{ $json.CATEGORY }}"
-            },
-            {
-              "name": "STRAPI_URL",
-              "value": "={{ $json.STRAPI_URL }}"
-            },
-            {
-              "name": "STRAPI_TOKEN",
-              "value": "={{ $json.STRAPI_TOKEN }}"
-            },
-            {
-              "name": "GITHUB_REPO_PATH",
-              "value": "={{ $json.GITHUB_REPO_PATH }}"
-            },
-            {
-              "name": "GITHUB_AUTO_PUSH",
-              "value": "={{ $json.GITHUB_AUTO_PUSH }}"
-            },
-            {
-              "name": "OUTPUT_JSON",
-              "value": "true"
-            }
-          ]
-        }
+        "jsCode": "const { execSync } = require('child_process');\nconst path = require('path');\n\nconst workingDir = 'C:\\\\Users\\\\yyutingliu\\\\Downloads\\\\AI生成網站測試\\\\cursor\\\\一個主題多個站(落地)';\nconst scriptPath = path.join(workingDir, 'export-strapi-to-github.cjs');\n\n// 從 Set Variables 節點取得資料\nconst setVarsNode = $('Set Variables').first();\nconst setVarsData = setVarsNode.json;\n\n// 設定環境變數\nconst env = {\n  ...process.env,\n  SITES: setVarsData.SITES,\n  DATE: setVarsData.DATE,\n  CATEGORY: setVarsData.CATEGORY,\n  STRAPI_URL: setVarsData.STRAPI_URL,\n  STRAPI_TOKEN: setVarsData.STRAPI_TOKEN,\n  GITHUB_REPO_PATH: setVarsData.GITHUB_REPO_PATH,\n  GITHUB_REPO_URL: setVarsData.GITHUB_REPO_URL,\n  GITHUB_AUTO_PUSH: setVarsData.GITHUB_AUTO_PUSH,\n  OUTPUT_JSON: 'true'\n};\n\ntry {\n  console.log(`執行匯出腳本: ${scriptPath}`);\n  \n  const output = execSync(`node \"${scriptPath}\"`, {\n    cwd: workingDir,\n    env: env,\n    encoding: 'utf8',\n    maxBuffer: 10 * 1024 * 1024 // 10MB buffer\n  });\n  \n  // 嘗試從輸出中解析 JSON 結果\n  let result = {\n    exitCode: 0,\n    output: output,\n    success: true\n  };\n  \n  // 如果輸出包含 JSON，嘗試解析\n  const jsonMatch = output.match(/\\{[\\s\\S]*\"success\"[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    try {\n      const parsed = JSON.parse(jsonMatch[0]);\n      result = { ...result, ...parsed };\n    } catch (e) {\n      // JSON 解析失敗，使用原始輸出\n    }\n  }\n  \n  return {\n    json: result\n  };\n} catch (error) {\n  console.error('匯出錯誤:', error);\n  return {\n    json: {\n      exitCode: error.status || 1,\n      output: error.stdout || error.message,\n      error: error.message,\n      stderr: error.stderr,\n      success: false\n    }\n  };\n}"
       },
       "id": "export-to-github",
       "name": "Export to GitHub",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [1050, 200]
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": $json.success !== false, \"message\": $json.success !== false ? \"文章生成完成！\" : \"文章生成失敗\", \"generationResult\": $('Generate Articles').first().json, \"exportResult\": $json, \"totalSuccess\": $('Generate Articles').first().json.successCount || 0, \"totalFail\": $('Generate Articles').first().json.failCount || 0, \"generatedArticles\": $('Generate Articles').first().json.results || [] } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1450, 200]
     }
   ],
   "connections": {
-    "Schedule Trigger": {
+    "Webhook": {
       "main": [
         [
           {
@@ -232,14 +154,14 @@
       "main": [
         [
           {
-            "node": "Execute Command",
+            "node": "Generate Articles",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Execute Command": {
+    "Generate Articles": {
       "main": [
         [
           {
@@ -259,7 +181,24 @@
             "index": 0
           }
         ],
-        []
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },

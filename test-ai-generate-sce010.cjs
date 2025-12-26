@@ -14,9 +14,9 @@ const CONFIG = {
     // Google AI Studio API Key（從 https://aistudio.google.com/app/apikey 取得）
     GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'AIzaSyDbPlZ9iOEJ-0tdf1fdTYUser4tEbjaUmw',
     
-    // Strapi 設定（本機）
-    STRAPI_URL: 'http://localhost:1337',
-    STRAPI_TOKEN: '6a02dd00859ce2861a884a1de0b5f7eaf4ee961b0e6bf0c07c7df72d47e1c9b142a07564ffadd433ffa9b851d14629989b07d72fb09457d775f3227cca99fbaee43200ccac7a0db7d6d65185ca71b317bae9d6c0db943abb50a9e3ed9f279e536c2acba98e2f642bb44f543d1c23fac24a131ec177f23d2d496715b9c5984c76',
+    // Strapi 設定（Railway 雲端）
+    STRAPI_URL: 'https://multi-site-strapi-backend-production.up.railway.app',
+    STRAPI_TOKEN: '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993',
     
     // 測試站點
     SITE: 'sce010',

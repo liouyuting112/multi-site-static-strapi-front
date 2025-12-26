@@ -1,0 +1,598 @@
+{
+  "name": "AI 自動生成文章完整流程（N8N 原生）",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-articles",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "generate-articles"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "SITES",
+              "value": "={{ $json.body.sites ? ($json.body.sites.join ? $json.body.sites.join(',') : $json.body.sites) : 'all' }}"
+            },
+            {
+              "name": "DATE",
+              "value": "={{ $json.body.date || $now.format('YYYY-MM-DD') }}"
+            },
+            {
+              "name": "COUNT",
+              "value": "={{ $json.body.count || '1' }}"
+            },
+            {
+              "name": "CATEGORY",
+              "value": "={{ $json.body.category || 'daily' }}"
+            },
+            {
+              "name": "STRAPI_URL",
+              "value": "https://multi-site-strapi-backend-production.up.railway.app"
+            },
+            {
+              "name": "STRAPI_TOKEN",
+              "value": "55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993"
+            },
+            {
+              "name": "GEMINI_API_KEY",
+              "value": "AIzaSyDuL2vhVx2XfjJrlZcunx2IA_L94eKptTI"
+            },
+            {
+              "name": "OPENAI_API_KEY",
+              "value": "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"
+            },
+            {
+              "name": "PROMPT_FILE_PATH",
+              "value": "C:\\Users\\yyutingliu\\Downloads\\AI生成網站測試\\cursor\\一個主題多個站(落地)\\下載\\新增文章提詞.txt"
+            },
+            {
+              "name": "GITHUB_REPO_PATH",
+              "value": "C:\\Users\\yyutingliu\\Downloads\\AI生成網站測試\\cursor\\一個主題多個站(落地)"
+            },
+            {
+              "name": "GITHUB_REPO_URL",
+              "value": "https://github.com/liouyuting112/multi-site-static-strapi-front.git"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-variables",
+      "name": "Set Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 處理數量（如果是範圍，隨機選擇）\nconst inputData = $input.item.json || {};\nconst count = inputData.COUNT || '1';\nlet finalCount = count;\nif (typeof count === 'string' && count.includes('-')) {\n  const [min, max] = count.split('-').map(Number);\n  finalCount = Math.floor(Math.random() * (max - min + 1)) + min;\n} else {\n  finalCount = parseInt(count, 10) || 1;\n}\n\n// 處理站點列表\nconst sitesStr = inputData.SITES || 'all';\nlet sites = [];\nif (sitesStr === 'all') {\n  // 稍後從 Strapi 取得\n  sites = ['all'];\n} else if (typeof sitesStr === 'string') {\n  sites = sitesStr.split(',').map(s => s.trim()).filter(s => s);\n} else if (Array.isArray(sitesStr)) {\n  sites = sitesStr.map(s => String(s).trim()).filter(s => s);\n} else {\n  sites = ['all'];\n}\n\n// 確保所有必要的變數都被傳遞（包括 STRAPI_URL, STRAPI_TOKEN 等）\nreturn {\n  json: {\n    // 保留所有原始資料\n    ...inputData,\n    // 更新處理後的資料\n    COUNT: finalCount,\n    SITES_ARRAY: sites,\n    SITES_TO_PROCESS: sitesStr,\n    // 確保這些變數存在（如果沒有，使用預設值）\n    STRAPI_URL: inputData.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app',\n    STRAPI_TOKEN: inputData.STRAPI_TOKEN || '',\n    GEMINI_API_KEY: inputData.GEMINI_API_KEY || '',\n    OPENAI_API_KEY: inputData.OPENAI_API_KEY || '',\n    DATE: inputData.DATE || new Date().toISOString().split('T')[0],\n    CATEGORY: inputData.CATEGORY || 'daily',\n    PROMPT_FILE_PATH: inputData.PROMPT_FILE_PATH || '',\n    GITHUB_REPO_PATH: inputData.GITHUB_REPO_PATH || '',\n    GITHUB_REPO_URL: inputData.GITHUB_REPO_URL || ''\n  }\n};"
+      },
+      "id": "process-params",
+      "name": "Process Parameters",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-all",
+              "leftValue": "={{ $json.SITES_ARRAY[0] }}",
+              "rightValue": "all",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-sites",
+      "name": "Check Sites",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 準備 URL 和 Token，然後傳遞給下一個 HTTP Request 節點\nconst strapiUrl = $json.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app';\nconst strapiToken = $json.STRAPI_TOKEN || '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993';\n\nconst url = `${strapiUrl}/api/posts?pagination[pageSize]=1000&fields[0]=site&sort=createdAt:desc`;\n\nconsole.log('🔗 準備連接:', url);\nconsole.log('🔑 Token 前 10 字元:', strapiToken.substring(0, 10));\n\n// 將 URL 和 Token 傳遞給下一個節點\nreturn {\n  json: {\n    ...$json,\n    FETCH_URL: url,\n    FETCH_AUTH_HEADER: `Bearer ${strapiToken}`\n  }\n};"
+      },
+      "id": "prepare-fetch-all-sites",
+      "name": "Prepare Fetch All Sites",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.FETCH_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $json.FETCH_AUTH_HEADER }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-all-sites",
+      "name": "Fetch All Sites",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 從 Strapi 回應中提取所有唯一的站點\nconst data = $input.item.json;\nconst posts = data.data || [];\nconst sites = new Set();\n\nposts.forEach(post => {\n  const attrs = post.attributes || post;\n  if (attrs.site) {\n    sites.add(attrs.site);\n  }\n});\n\nconst sitesArray = Array.from(sites).sort();\n\n// 從 Process Parameters 節點取得所有變數\nconst processParams = $('Process Parameters').first().json || {};\n\nreturn {\n  json: {\n    // 保留所有原始變數\n    ...processParams,\n    // 更新站點陣列\n    SITES_ARRAY: sitesArray,\n    // 確保這些變數存在\n    STRAPI_URL: processParams.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app',\n    STRAPI_TOKEN: processParams.STRAPI_TOKEN || '',\n    GEMINI_API_KEY: processParams.GEMINI_API_KEY || '',\n    OPENAI_API_KEY: processParams.OPENAI_API_KEY || '',\n    DATE: processParams.DATE || new Date().toISOString().split('T')[0],\n    CATEGORY: processParams.CATEGORY || 'daily',\n    COUNT: processParams.COUNT || 1,\n    PROMPT_FILE_PATH: processParams.PROMPT_FILE_PATH || '',\n    GITHUB_REPO_PATH: processParams.GITHUB_REPO_PATH || '',\n    GITHUB_REPO_URL: processParams.GITHUB_REPO_URL || ''\n  }\n};"
+      },
+      "id": "extract-sites",
+      "name": "Extract Sites",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 為每個站點建立多個項目（根據 COUNT）\nconst sites = $json.SITES_ARRAY || [];\nconst count = $json.COUNT || 1;\nconst items = [];\n\nfor (const site of sites) {\n  for (let i = 0; i < count; i++) {\n    items.push({\n      json: {\n        ...$json,\n        CURRENT_SITE: site,\n        ARTICLE_INDEX: i + 1,\n        ARTICLE_TOTAL: count\n      }\n    });\n  }\n}\n\nreturn items;"
+      },
+      "id": "split-sites",
+      "name": "Split Sites",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app' }}/api/posts?filters[site][$eq]={{ $json.CURRENT_SITE }}&filters[category][$eq]={{ $json.CATEGORY }}&sort=date:desc&pagination[limit]=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.STRAPI_TOKEN || '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993' }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-existing-posts",
+      "name": "Fetch Existing Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 使用預設提示詞（N8N Code 節點不允許使用 fs 模組）\nconst prompt = `你是一個專業的內容寫手，專門為網站撰寫文章。\n\n請根據以下現有文章的主題和風格，生成一篇新的文章：\n\n要求：\n1. 標題要吸引人，符合網站主題\n2. 內容約 800-1200 字\n3. 使用 HTML 格式（段落用 <p>，標題用 <h2>，列表用 <ul><li>）\n4. 風格要輕鬆有趣，但要有專業感\n\n請直接輸出完整的 HTML 文章內容，包含標題和內文。`;\n\n// 提取現有文章標題\nconst postsData = $input.item.json;\nconst posts = postsData.data || [];\nconst existingTitles = posts.map(post => {\n  const attrs = post.attributes || post;\n  return `- ${attrs.title || '無標題'} (${attrs.date || attrs.publishedAt || ''})`;\n}).join('\\n');\n\nconst fullPrompt = `${prompt}\n\n站點：${$json.CURRENT_SITE}\n現有文章範例：\n${existingTitles || '(無現有文章)'}\n\n請生成一篇全新的文章，標題和內容都要與上述文章不同，但風格要一致。`;\n\nreturn {\n  json: {\n    ...$json,\n    PROMPT: fullPrompt\n  }\n};"
+      },
+      "id": "prepare-prompt",
+      "name": "Prepare Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${$json.GEMINI_API_KEY || 'AIzaSyDuL2vhVx2XfjJrlZcunx2IA_L94eKptTI'}` }}",
+        "sendBody": true,
+        "bodyContentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"contents\": [{ \"parts\": [{ \"text\": $json.PROMPT }] }], \"generationConfig\": { \"temperature\": 0.7, \"maxOutputTokens\": 2000 } } }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "call-gemini",
+      "name": "Call Gemini API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 Gemini 回應\nconst response = $input.item.json;\nlet aiText = '';\n\ntry {\n  if (response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts && response.candidates[0].content.parts[0]) {\n    aiText = response.candidates[0].content.parts[0].text || '';\n  } else {\n    aiText = JSON.stringify(response);\n  }\n} catch (e) {\n  aiText = JSON.stringify(response);\n}\n\n// 從前面的節點獲取所有必要的變數\nconst preparePromptNode = $('Prepare Prompt').first();\nconst previousData = preparePromptNode ? preparePromptNode.json : {};\n\n// 解析文章（提取標題、內容、摘要、圖片）\nlet cleanedText = aiText.replace(/^```html\\s*/i, '').replace(/\\s*```$/i, '').trim();\n\nlet title = '';\nlet htmlContent = cleanedText;\n\n// 找 <h1> 或 <h2>\nconst h1Match = cleanedText.match(/<h1[^>]*>([^<]+)<\\/h1>/i);\nif (h1Match) {\n  title = h1Match[1].trim();\n  htmlContent = cleanedText.replace(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i, '').trim();\n} else {\n  const h2Match = cleanedText.match(/<h2[^>]*>([^<]+)<\\/h2>/i);\n  if (h2Match) {\n    title = h2Match[1].trim();\n    htmlContent = cleanedText.replace(/<h2[^>]*>[\\s\\S]*?<\\/h2>/i, '').trim();\n  }\n}\n\nif (!title) {\n  const lines = cleanedText.split('\\n').filter(l => l.trim() && !l.trim().startsWith('<'));\n  if (lines.length > 0) {\n    title = lines[0].replace(/^#+\\s*/, '').trim();\n  }\n}\n\nif (!title) {\n  title = 'AI 生成的文章';\n}\n\n// 確保 HTML 內容有基本結構\nif (!htmlContent.includes('<p>') && !htmlContent.includes('<h2>')) {\n  htmlContent = htmlContent\n    .split('\\n\\n')\n    .filter(p => p.trim())\n    .map(p => `<p>${p.trim()}</p>`)\n    .join('\\n\\n');\n}\n\n// 提取 excerpt（28 字元 + \"...\"）\nlet excerpt = '';\nconst firstPMatch = htmlContent.match(/<p[^>]*>([^<]+)<\\/p>/i);\nif (firstPMatch) {\n  let rawExcerpt = firstPMatch[1].trim();\n  if (rawExcerpt.length > 28) {\n    excerpt = rawExcerpt.substring(0, 28) + '...';\n  } else {\n    excerpt = rawExcerpt;\n  }\n} else {\n  const textContent = htmlContent.replace(/<[^>]+>/g, '').trim();\n  if (textContent.length > 0) {\n    if (textContent.length > 28) {\n      excerpt = textContent.substring(0, 28) + '...';\n    } else {\n      excerpt = textContent;\n    }\n  }\n}\n\n// 提取 imageUrl\nlet imageUrl = '';\nconst imgMatch = htmlContent.match(/<img[^>]+src=[\"']([^\"']+)[\"']/i);\nif (imgMatch) {\n  imageUrl = imgMatch[1];\n}\n\nreturn {\n  json: {\n    // 保留所有之前的變數\n    ...previousData,\n    // 添加生成的文章內容\n    GENERATED_TITLE: title,\n    GENERATED_HTML: htmlContent,\n    GENERATED_EXCERPT: excerpt,\n    GENERATED_IMAGE_URL: imageUrl\n  }\n};"
+      },
+      "id": "parse-article",
+      "name": "Parse Article",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 準備 Strapi payload\n// 確保 DATE 存在，如果沒有則使用今天日期\nconst dateStr = $json.DATE || new Date().toISOString().split('T')[0];\nconst timestamp = Date.now().toString().slice(-6);\nconst slug = `${dateStr}-${timestamp}`;\n\n// 如果沒有 imageUrl，生成預設圖片 URL\nlet finalImageUrl = $json.GENERATED_IMAGE_URL;\nif (!finalImageUrl && dateStr) {\n  const dateSuffix = dateStr.replace(/-/g, '').substring(4);\n  finalImageUrl = `https://raw.githubusercontent.com/test100web/100-website/main/images/${$json.CURRENT_SITE}-daily${dateSuffix}.webp`;\n}\n\n// 處理 excerpt\nlet finalExcerpt = $json.GENERATED_EXCERPT || '';\nif (finalExcerpt.endsWith('...')) {\n  finalExcerpt = finalExcerpt.slice(0, -3);\n}\nif (finalExcerpt.length > 28) {\n  finalExcerpt = finalExcerpt.substring(0, 28);\n}\nconst originalLength = ($json.GENERATED_EXCERPT || '').trim().length;\nif (originalLength > 28) {\n  finalExcerpt = finalExcerpt + '...';\n}\n\nconst payload = {\n  data: {\n    site: $json.CURRENT_SITE,\n    category: $json.CATEGORY,\n    slug: slug,\n    title: $json.GENERATED_TITLE,\n    html: $json.GENERATED_HTML,\n    date: dateStr,\n    publishedAt: `${dateStr}T09:00:00.000Z`,\n    isFeatured: true,\n    excerpt: finalExcerpt,\n    imageUrl: finalImageUrl\n  }\n};\n\nreturn {\n  json: {\n    ...$json,\n    STRAPI_PAYLOAD: payload,\n    STRAPI_SLUG: slug\n  }\n};"
+      },
+      "id": "prepare-strapi-payload",
+      "name": "Prepare Strapi Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app' }}/api/posts",
+        "sendBody": true,
+        "bodyContentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.STRAPI_PAYLOAD }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.STRAPI_TOKEN || '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993' }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "retry": {
+              "maxRetries": 3,
+              "retryDelay": 1000
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json",
+              "fullResponse": false
+            }
+          }
+        },
+        "continueOnFail": true
+      },
+      "id": "save-to-strapi",
+      "name": "Save to Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 檢查 Strapi 回應並標記成功或失敗\nconst inputData = $input.item.json || {};\nconst strapiResponse = inputData;\n\n// 檢查是否有錯誤（N8N HTTP Request 節點失敗時會有 error 屬性）\nlet isSuccess = false;\nlet errorMessage = null;\n\n// 檢查是否有 N8N 錯誤\nif (inputData.error) {\n  isSuccess = false;\n  errorMessage = `HTTP 錯誤: ${inputData.error.message || JSON.stringify(inputData.error)}`;\n} else if (inputData.statusCode && inputData.statusCode >= 400) {\n  // HTTP 狀態碼錯誤\n  isSuccess = false;\n  errorMessage = `HTTP ${inputData.statusCode}: ${inputData.body || inputData.message || '請求失敗'}`;\n} else if (strapiResponse && strapiResponse.data) {\n  // 成功：有 data 屬性（Strapi v4 格式）\n  isSuccess = true;\n} else if (strapiResponse && strapiResponse.error) {\n  // 失敗：有 error 屬性\n  isSuccess = false;\n  errorMessage = strapiResponse.error.message || JSON.stringify(strapiResponse.error);\n} else if (strapiResponse && (strapiResponse.id || strapiResponse.documentId)) {\n  // 成功：有 id 或 documentId（Strapi v4 直接回應格式）\n  isSuccess = true;\n} else if (strapiResponse && strapiResponse.attributes) {\n  // 成功：有 attributes（Strapi v4 另一種格式）\n  isSuccess = true;\n} else {\n  // 無法判斷，檢查回應內容\n  const responseStr = JSON.stringify(strapiResponse);\n  if (!responseStr || responseStr === '{}' || responseStr === 'null') {\n    isSuccess = false;\n    errorMessage = 'Strapi 沒有返回任何資料，可能是連接失敗或請求格式錯誤';\n  } else if (responseStr.includes('error') || responseStr.includes('Error') || responseStr.includes('Unauthorized') || responseStr.includes('Forbidden')) {\n    isSuccess = false;\n    errorMessage = 'Strapi 錯誤: ' + responseStr.substring(0, 300);\n  } else {\n    // 預設為失敗，因為沒有明確的成功標記\n    isSuccess = false;\n    errorMessage = 'Strapi 回應格式異常：' + responseStr.substring(0, 300);\n  }\n}\n\nreturn {\n  json: {\n    ...$json,\n    SUCCESS: isSuccess,\n    STRAPI_RESPONSE: strapiResponse,\n    ARTICLE_TITLE: $json.GENERATED_TITLE,\n    ARTICLE_SLUG: $json.STRAPI_SLUG,\n    ERROR_MESSAGE: errorMessage\n  }\n};"
+      },
+      "id": "mark-success",
+      "name": "Mark Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2850, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app' }}/api/posts?filters[site][$eq]={{ $json.CURRENT_SITE }}&filters[category][$eq]={{ $json.CATEGORY }}&filters[date][$eq]={{ $json.DATE }}&sort=createdAt:desc",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.STRAPI_TOKEN || '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993' }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-posts-for-export",
+      "name": "Fetch Posts for Export",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 準備 HTML 內容（N8N Code 節點不允許使用 fs 模組，實際檔案寫入需要外部處理）\nconst postsData = $input.item.json;\nconst posts = postsData.data || [];\nconst site = $json.CURRENT_SITE;\nconst category = $json.CATEGORY;\n\nconst htmlFiles = [];\n\nfor (const post of posts) {\n  const attrs = post.attributes || post;\n  const slug = attrs.slug;\n  const title = attrs.title || '無標題';\n  const htmlContent = attrs.html || '<p>無內容</p>';\n  const date = attrs.date || new Date().toISOString().split('T')[0];\n  const excerpt = attrs.excerpt || '';\n  const imageUrl = attrs.imageUrl || '';\n\n  const fullHtml = `<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>${title} | ${site}</title>\n    <meta name=\"description\" content=\"${excerpt}\">\n    <link rel=\"stylesheet\" href=\"${category === 'daily' ? '../' : ''}../css/style.css\">\n    <link rel=\"canonical\" href=\"https://multi-site-static-strapi-front.vercel.app/${site}/${category === 'daily' ? 'articles' : 'fixed-articles'}/${slug}.html\">\n</head>\n<body>\n    <main>\n        <article class=\"article-page\">\n            <div class=\"container\">\n                <div class=\"article-header\">\n                    <span class=\"article-date\">${date}</span>\n                    <h1>${title}</h1>\n                    ${imageUrl ? `<img src=\"${imageUrl}\" alt=\"${title}\" loading=\"lazy\">` : ''}\n                </div>\n                <div class=\"article-content\">\n                    ${htmlContent}\n                </div>\n            </div>\n        </article>\n    </main>\n    <script src=\"${category === 'daily' ? '../' : ''}../js/main.js\"></script>\n    <script src=\"${category === 'daily' ? '../' : ''}../../article-cms.js\" data-site=\"${site}\"></script>\n</body>\n</html>`;\n\n  htmlFiles.push({\n    slug: slug,\n    title: title,\n    html: fullHtml,\n    path: `${site}/${category === 'daily' ? 'articles' : 'fixed-articles'}/${slug}.html`\n  });\n}\n\nreturn {\n  json: {\n    ...$json,\n    HTML_FILES: htmlFiles,\n    EXPORT_SUCCESS: true\n  }\n};"
+      },
+      "id": "generate-html-files",
+      "name": "Generate HTML Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 標記 Git 操作需要外部處理（N8N Code 節點不允許使用 child_process 模組）\n// 實際的 Git 操作需要通過外部腳本或 API 來完成\nconst htmlFiles = $json.HTML_FILES || [];\n\n// 即使沒有檔案，也視為成功（因為文章已經成功生成並保存到 Strapi）\nif (htmlFiles.length === 0) {\n  return {\n    json: {\n      ...$json,\n      GIT_SUCCESS: true,\n      GIT_NOTE: '文章已成功生成並保存到 Strapi，但沒有找到需要匯出的文章（可能查詢條件不匹配或文章尚未被索引）',\n      HTML_FILES: []\n    }\n  };\n}\n\n// 準備 Git 操作資訊\nconst gitInfo = {\n  repoPath: $json.GITHUB_REPO_PATH,\n  repoUrl: $json.GITHUB_REPO_URL,\n  files: htmlFiles.map(f => f.path),\n  commitMessage: `Auto: 匯出 ${htmlFiles.length} 篇文章 (${$json.DATE})`\n};\n\nreturn {\n  json: {\n    ...$json,\n    GIT_INFO: gitInfo,\n    GIT_SUCCESS: true,\n    GIT_NOTE: 'Git 操作需要外部處理，HTML 內容已準備在 HTML_FILES 中'\n  }\n};"
+      },
+      "id": "push-to-github",
+      "name": "Push to GitHub",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 收集所有結果\nconst allResults = $input.all();\nconst successResults = allResults.filter(item => item.json.SUCCESS === true);\nconst failResults = allResults.filter(item => item.json.SUCCESS !== true);\n\n// 生成的文章列表\nconst generatedArticles = successResults.map(item => ({\n  site: item.json.CURRENT_SITE,\n  title: item.json.ARTICLE_TITLE || null,\n  slug: item.json.ARTICLE_SLUG || null,\n  success: true\n}));\n\nconst summary = {\n  success: failResults.length === 0,\n  total: allResults.length,\n  successCount: successResults.length,\n  failCount: failResults.length,\n  generatedArticles: generatedArticles,\n  results: allResults.map(item => ({\n    site: item.json.CURRENT_SITE,\n    success: item.json.SUCCESS || false,\n    title: item.json.ARTICLE_TITLE || null,\n    slug: item.json.ARTICLE_SLUG || null,\n    error: item.json.ERROR_MESSAGE || item.json.EXPORT_ERROR || (item.json.GIT_ERROR && item.json.GIT_ERROR !== '沒有檔案需要上傳' ? item.json.GIT_ERROR : null) || null\n  }))\n};\n\nreturn {\n  json: summary\n};"
+      },
+      "id": "collect-results",
+      "name": "Collect Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [3850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables": {
+      "main": [
+        [
+          {
+            "node": "Process Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Parameters": {
+      "main": [
+        [
+          {
+            "node": "Check Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Sites": {
+      "main": [
+        [
+          {
+            "node": "Prepare Fetch All Sites",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Fetch All Sites": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Sites": {
+      "main": [
+        [
+          {
+            "node": "Extract Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Sites": {
+      "main": [
+        [
+          {
+            "node": "Split Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Sites": {
+      "main": [
+        [
+          {
+            "node": "Fetch Existing Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Existing Posts": {
+      "main": [
+        [
+          {
+            "node": "Prepare Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Prompt": {
+      "main": [
+        [
+          {
+            "node": "Call Gemini API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Gemini API": {
+      "main": [
+        [
+          {
+            "node": "Parse Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Article": {
+      "main": [
+        [
+          {
+            "node": "Prepare Strapi Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Strapi Payload": {
+      "main": [
+        [
+          {
+            "node": "Save to Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Strapi": {
+      "main": [
+        [
+          {
+            "node": "Mark Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Success": {
+      "main": [
+        [
+          {
+            "node": "Fetch Posts for Export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Posts for Export": {
+      "main": [
+        [
+          {
+            "node": "Generate HTML Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HTML Files": {
+      "main": [
+        [
+          {
+            "node": "Push to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Results": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-12-24T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,100 @@
+========================================
+N8N 快速設定步驟（簡化版）
+========================================
+
+【步驟 1】安裝 N8N
+-------------------
+在命令提示字元執行：
+  npm install n8n -g
+  n8n start
+
+然後打開瀏覽器：http://localhost:5678
+
+
+【步驟 2】建立 Workflow
+-------------------
+1. 點擊左側 "Workflows"
+2. 點擊 "+ Add workflow"
+3. 命名為 "AI 自動生成文章"
+
+
+【步驟 3】加入節點（依順序）
+-------------------
+
+節點 1：Schedule Trigger（定時觸發）
+  - 拖曳 "Schedule Trigger" 到畫布
+  - 設定：每天 9:00 執行
+    Rule → Interval → Hours → 1
+    Trigger At Hour → 9
+    Trigger At Minute → 0
+
+節點 2：Set（設定變數）
+  - 拖曳 "Set" 到畫布，連接到 Schedule Trigger
+  - 點擊 "Add Value"，加入以下變數：
+    
+    SITES = sce010,site1,cds006
+    DATE = {{ $now.format('YYYY-MM-DD') }}
+    COUNT = 1
+    CATEGORY = daily
+    STRAPI_URL = http://localhost:1337
+    STRAPI_TOKEN = 你的Token（從Strapi後台取得）
+    GEMINI_API_KEY = 你的API Key
+    PROMPT_FILE = C:\Users\yyutingliu\Downloads\AI生成網站測試\cursor\一個主題多個站(落地)\下載\新增文章提詞.txt
+    OUTPUT_JSON = true
+
+節點 3：Execute Command（執行腳本）
+  - 拖曳 "Execute Command" 到畫布，連接到 Set
+  - 設定：
+    Command = node
+    Arguments = ai-generate-articles.cjs
+    Working Directory = C:\Users\yyutingliu\Downloads\AI生成網站測試\cursor\一個主題多個站(落地)
+    
+  - 在 "Environment Variables" 加入：
+    SITES = {{ $json.SITES }}
+    DATE = {{ $json.DATE }}
+    COUNT = {{ $json.COUNT }}
+    CATEGORY = {{ $json.CATEGORY }}
+    STRAPI_URL = {{ $json.STRAPI_URL }}
+    STRAPI_TOKEN = {{ $json.STRAPI_TOKEN }}
+    GEMINI_API_KEY = {{ $json.GEMINI_API_KEY }}
+    PROMPT_FILE = {{ $json.PROMPT_FILE }}
+    OUTPUT_JSON = {{ $json.OUTPUT_JSON }}
+
+
+【步驟 4】測試
+-------------------
+1. 點擊右上角 "Execute Workflow"（手動測試）
+2. 檢查每個節點的輸出
+3. 確認 Strapi 後台有新文章
+
+
+【步驟 5】啟用自動排程
+-------------------
+1. 點擊右上角的 "Active" 開關
+2. Workflow 會根據 Schedule Trigger 自動執行
+
+
+【重要提醒】
+-------------------
+1. 確認 Node.js 已安裝
+2. 確認 Strapi 正在運行（http://localhost:1337）
+3. 確認腳本路徑正確
+4. Token 和 API Key 要正確設定
+
+
+【常用設定】
+-------------------
+- 所有站點：SITES = all
+- 指定日期：DATE = 2025-12-25
+- 多篇文章：COUNT = 2
+- 不同類別：CATEGORY = fixed
+
+
+【問題排除】
+-------------------
+- 找不到 node：確認 Node.js 在 PATH 中
+- 環境變數沒傳入：檢查 Set 節點的變數名稱
+- Strapi 連線失敗：確認 Strapi 正在運行
+- 腳本執行失敗：檢查 Execute Command 的輸出日誌
+
+

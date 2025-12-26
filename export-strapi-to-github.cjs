@@ -19,11 +19,12 @@ let fetch;
 // =========================================================
 const CONFIG = {
     // Strapi 設定
-    STRAPI_URL: process.env.STRAPI_URL || 'http://localhost:1337',
-    STRAPI_TOKEN: process.env.STRAPI_TOKEN || '6a02dd00859ce2861a884a1de0b5f7eaf4ee961b0e6bf0c07c7df72d47e1c9b142a07564ffadd433ffa9b851d14629989b07d72fb09457d775f3227cca99fbaee43200ccac7a0db7d6d65185ca71b317bae9d6c0db943abb50a9e3ed9f279e536c2acba98e2f642bb44f543d1c23fac24a131ec177f23d2d496715b9c5984c76',
+    STRAPI_URL: process.env.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app',
+    STRAPI_TOKEN: process.env.STRAPI_TOKEN || '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993',
     
     // GitHub 設定
     GITHUB_REPO_PATH: process.env.GITHUB_REPO_PATH || path.join(__dirname),
+    GITHUB_REPO_URL: process.env.GITHUB_REPO_URL || null, // GitHub Repository URL（可選，用於自動設定 remote）
     GITHUB_AUTO_PUSH: process.env.GITHUB_AUTO_PUSH !== 'false', // 預設自動 push
     
     // 要匯出的站點（逗號分隔，或 'all' 表示全部）
@@ -249,8 +250,43 @@ function generateArticleHTML(post, siteFolder, site) {
 // =========================================================
 // Git 操作
 // =========================================================
+function ensureGitRepo(repoPath) {
+    try {
+        process.chdir(repoPath);
+        
+        // 檢查是否為 Git 倉庫
+        try {
+            execSync('git rev-parse --git-dir', { stdio: 'pipe' });
+        } catch (e) {
+            console.log('📦 初始化 Git 倉庫...');
+            execSync('git init', { stdio: 'inherit' });
+        }
+        
+        // 如果有提供 GITHUB_REPO_URL，設定 remote
+        if (CONFIG.GITHUB_REPO_URL) {
+            try {
+                execSync('git remote get-url origin', { stdio: 'pipe' });
+                console.log('✅ Git remote 已設定');
+            } catch (e) {
+                console.log(`📡 設定 Git remote: ${CONFIG.GITHUB_REPO_URL}`);
+                execSync(`git remote add origin ${CONFIG.GITHUB_REPO_URL}`, { stdio: 'inherit' });
+            }
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Git 初始化失敗:', error.message);
+        return false;
+    }
+}
+
 function gitAddAndCommit(repoPath, message) {
     try {
+        // 確保 Git 倉庫已初始化
+        if (!ensureGitRepo(repoPath)) {
+            return false;
+        }
+        
         // 切換到 repo 目錄
         process.chdir(repoPath);
         
@@ -279,6 +315,7 @@ function gitPush(repoPath) {
         return true;
     } catch (error) {
         console.error('❌ Git push 失敗:', error.message);
+        console.error('💡 提示：請確認 Git 認證已設定（GitHub Token 或 SSH Key）');
         return false;
     }
 }

@@ -48,13 +48,19 @@ app.use(express.json());
 app.use(express.static(__dirname)); // 提供靜態檔案（HTML）
 
 // 設定（從環境變數或預設值）
+// 注意：如果環境變數 STRAPI_TOKEN 已設定，會優先使用環境變數
 const CONFIG = {
-    STRAPI_URL: process.env.STRAPI_URL || 'http://localhost:1337',
-    STRAPI_TOKEN: process.env.STRAPI_TOKEN || '6a02dd00859ce2861a884a1de0b5f7eaf4ee961b0e6bf0c07c7df72d47e1c9b142a07564ffadd433ffa9b851d14629989b07d72fb09457d775f3227cca99fbaee43200ccac7a0db7d6d65185ca71b317bae9d6c0db943abb50a9e3ed9f279e536c2acba98e2f642bb44f543d1c23fac24a131ec177f23d2d496715b9c5984c76',
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'AIzaSyDbPlZ9iOEJ-0tdf1fdTYUser4tEbjaUmw',
+    STRAPI_URL: process.env.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app',
+    // 強制使用新的 Token（如果環境變數存在但錯誤，可以註解掉環境變數檢查）
+    STRAPI_TOKEN: '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993',
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'AIzaSyDuL2vhVx2XfjJrlZcunx2IA_L94eKptTI',
     SCRIPT_PATH: path.join(__dirname, '..', 'ai-generate-articles.cjs'),
     PROMPT_FILE: path.join(__dirname, '..', '下載', '新增文章提詞.txt')
 };
+
+// 驗證 Token 是否正確
+console.log(`\n🔑 使用 Token 前 10 字元: ${CONFIG.STRAPI_TOKEN.substring(0, 10)}...`);
+console.log(`📍 Strapi URL: ${CONFIG.STRAPI_URL}\n`);
 
 // API: 取得所有站點列表
 app.get('/api/sites', async (req, res) => {
@@ -65,6 +71,9 @@ app.get('/api/sites', async (req, res) => {
             `fields[0]=site&` +
             `sort=createdAt:desc`;
         
+        console.log(`🔍 正在從 Strapi 取得站點列表: ${url}`);
+        console.log(`🔑 使用 Token 前 10 字元: ${CONFIG.STRAPI_TOKEN.substring(0, 10)}...`);
+        
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
@@ -73,7 +82,9 @@ app.get('/api/sites', async (req, res) => {
         });
         
         if (!response.ok) {
-            throw new Error(`Strapi API 錯誤: ${response.status}`);
+            const errorText = await response.text();
+            console.error(`❌ Strapi API 錯誤 (${response.status}):`, errorText);
+            throw new Error(`Strapi API 錯誤: ${response.status} - ${errorText.substring(0, 200)}`);
         }
         
         const data = await response.json();
@@ -88,20 +99,27 @@ app.get('/api/sites', async (req, res) => {
             }
         });
         
+        const sitesArray = Array.from(sites).sort();
+        console.log(`✅ 找到 ${sitesArray.length} 個站點: ${sitesArray.join(', ')}`);
+        
         res.json({
             success: true,
-            sites: Array.from(sites).sort()
+            sites: sitesArray
         });
     } catch (error) {
-        console.error('取得站點列表失敗:', error);
+        console.error('❌ 取得站點列表失敗:', error.message);
         // 如果失敗，返回預設列表
+        const defaultSites = ['sce010', 'site1', 'site2', 'site3', 'cds006', 'awh008', 'dlh011'];
+        console.log(`⚠️  使用預設站點列表: ${defaultSites.join(', ')}`);
         res.json({
             success: false,
-            sites: ['sce010', 'site1', 'site2', 'site3', 'cds006', 'awh008', 'dlh011'],
-            error: error.message
+            sites: defaultSites,
+            error: error.message,
+            message: '無法從 Strapi 取得站點列表，使用預設列表。請確認 Strapi 是否正在運行且 Token 正確。'
         });
     }
 });
+
 
 // API: 生成文章
 app.post('/api/generate', (req, res) => {

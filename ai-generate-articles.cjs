@@ -8,21 +8,24 @@ const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+// 全域 fetch 變數（將在需要時動態載入）
+let fetch;
+
 // =========================================================
 // 設定（可透過環境變數或參數覆蓋）
 // =========================================================
 const CONFIG = {
     // Google AI Studio API Key
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'AIzaSyDbPlZ9iOEJ-0tdf1fdTYUser4tEbjaUmw',
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'AIzaSyDuL2vhVx2XfjJrlZcunx2IA_L94eKptTI',
     
     // Strapi 設定
-    STRAPI_URL: process.env.STRAPI_URL || 'http://localhost:1337',
-    STRAPI_TOKEN: process.env.STRAPI_TOKEN || '6a02dd00859ce2861a884a1de0b5f7eaf4ee961b0e6bf0c07c7df72d47e1c9b142a07564ffadd433ffa9b851d14629989b07d72fb09457d775f3227cca99fbaee43200ccac7a0db7d6d65185ca71b317bae9d6c0db943abb50a9e3ed9f279e536c2acba98e2f642bb44f543d1c23fac24a131ec177f23d2d496715b9c5984c76',
+    STRAPI_URL: process.env.STRAPI_URL || 'https://multi-site-strapi-backend-production.up.railway.app',
+    STRAPI_TOKEN: process.env.STRAPI_TOKEN || '55f0580acab131abb8b2ddf799949b620a5ce912870030d61a46732f92e794512eda3634fe07397be92e6bc5399a444534269c0affd7b3eabd3a80136146406bf012eb491b17dcf8587af650e9b0a68f75d63cd733b748352df1da591f5c811c4e29ded4b64d9c016ab8f91dd623fc5c813b7705162b87fa29443d3a5e6b1993',
     
     // 提示詞檔案路徑
     PROMPT_FILE: process.env.PROMPT_FILE || path.join(__dirname, '下載', '新增文章提詞.txt'),
     
-    // Gemini 模型
+    // Gemini 模型（嘗試多個可能的模型名稱）
     GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 };
 
@@ -119,6 +122,16 @@ function loadPrompt() {
 // =========================================================
 async function fetchExistingPosts(site, category, limit = 5) {
     try {
+        // 動態載入 node-fetch
+        let fetch;
+        try {
+            const nodeFetch = await import('node-fetch');
+            fetch = nodeFetch.default;
+        } catch (e) {
+            console.warn('無法載入 node-fetch，跳過抓取現有文章');
+            return [];
+        }
+        
         const url = `${CONFIG.STRAPI_URL}/api/posts?` +
             `filters[site][$eq]=${site}&` +
             `filters[category][$eq]=${category}&` +
@@ -157,8 +170,20 @@ async function fetchExistingPosts(site, category, limit = 5) {
 // =========================================================
 async function generateArticleWithGemini(site, existingPosts, prompt) {
     try {
+        // 驗證 API Key
+        if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+            throw new Error('Gemini API Key 未設定或無效');
+        }
+        
         const genAI = new GoogleGenerativeAI(CONFIG.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: CONFIG.GEMINI_MODEL });
+        
+        // 使用確認可用的模型名稱（從測試結果得知）
+        const modelName = 'models/gemini-2.5-flash';
+        
+        console.log(`🔑 API Key 前 10 字元: ${CONFIG.GEMINI_API_KEY.substring(0, 10)}...`);
+        console.log(`🤖 使用模型: ${modelName}`);
+        
+        const model = genAI.getGenerativeModel({ model: modelName });
         
         const existingTitles = existingPosts.map(p => `- ${p.title} (${p.date})`).join('\n');
         
@@ -170,11 +195,26 @@ ${existingTitles || '(無現有文章)'}
 
 請生成一篇全新的文章，標題和內容都要與上述文章不同，但風格要一致。`;
         
+        console.log(`📝 提示詞長度: ${fullPrompt.length} 字元`);
+        
         const result = await model.generateContent(fullPrompt);
         const response = await result.response;
-        return response.text();
+        const generatedText = response.text();
+        
+        console.log(`✅ AI 生成完成，長度: ${generatedText.length} 字元`);
+        return generatedText;
     } catch (error) {
-        throw new Error(`Gemini API 錯誤: ${error.message}`);
+        console.error(`❌ Gemini API 詳細錯誤:`, error);
+        // 提供更詳細的錯誤訊息
+        let errorMsg = `Gemini API 錯誤: ${error.message}`;
+        if (error.message.includes('API_KEY_INVALID')) {
+            errorMsg += ' (API Key 無效，請檢查 GEMINI_API_KEY)';
+        } else if (error.message.includes('404')) {
+            errorMsg += ` (模型不存在: ${CONFIG.GEMINI_MODEL}，請檢查模型名稱)`;
+        } else if (error.message.includes('fetch')) {
+            errorMsg += ' (網路連接失敗，請檢查網路連線)';
+        }
+        throw new Error(errorMsg);
     }
 }
 
@@ -298,6 +338,15 @@ async function saveToStrapi(site, category, dateStr, title, htmlContent, excerpt
         
         if (finalImageUrl) {
             payload.data.imageUrl = finalImageUrl;
+        }
+        
+        // 動態載入 node-fetch
+        let fetch;
+        try {
+            const nodeFetch = await import('node-fetch');
+            fetch = nodeFetch.default;
+        } catch (e) {
+            throw new Error('無法載入 node-fetch');
         }
         
         // 建立新文章

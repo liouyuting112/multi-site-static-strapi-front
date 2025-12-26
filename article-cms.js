@@ -4,11 +4,10 @@
 
 console.log('✅ article-cms.js 已載入');
 
-// 強制使用本機 Strapi（測試環境）
+// 使用 Railway 雲端 Strapi
 function getStrapiUrl() {
-    // 強制使用本機開發環境 Strapi
-    console.log('✅ 強制使用本機開發環境 Strapi');
-    return 'http://localhost:1337'; // 強制使用本機
+    console.log('✅ 使用 Railway 雲端 Strapi');
+    return 'https://multi-site-strapi-backend-production.up.railway.app';
 }
 
 const STRAPI_URL = getStrapiUrl();
